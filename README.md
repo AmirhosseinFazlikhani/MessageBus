@@ -3,27 +3,27 @@ A simple event bus that use RabbitMq.
 
 All events should be inherit from IntegrativeEvent. You can track events in logs with its unique id that is a Guid.
 ```
- public class TestIE : IntegrativeEvent
- {
-  public string Name { get; set; }
- }
+public class TestIE : IntegrativeEvent
+{
+	public string Name { get; set; }
+}
 ```
 Use ***IMessagePublisher*** for publish messages:
 ```
 public class ExampleClass
 {
-  private readonly IMessagePublisher _publisher;
+	private readonly IMessagePublisher _publisher;
 
-  public ExampleClass(IMessagePublisher publisher)
-  {
-    _publisher = publisher;
-  }
+	public ExampleClass(IMessagePublisher publisher)
+	{
+		_publisher = publisher;
+	}
 
-  public async Task Publish()
-  {
-    var @event = new TestIE { Name = "test event" };
-    await _publisher.PublishAsync(@event);
-  }
+	public async Task Publish()
+	{
+		var @event = new TestIE { Name = "test event" };
+		await _publisher.PublishAsync(@event);
+	}
 }
 ```
 Event can has unlimited handler. event handlers should inherit from ***BaseEventHandler*** and implement two method:
