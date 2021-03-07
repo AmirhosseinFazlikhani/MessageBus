@@ -39,7 +39,7 @@ namespace EventBus.RabbitMq.Abstractions
 		{
 			_subscriber.Disconnect();
 
-			return Task.CompletedTask;
+			return base.StopAsync(cancellationToken);
 		}
 
 		protected abstract void GetServices(IServiceProvider provider);
