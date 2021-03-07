@@ -19,30 +19,28 @@ namespace EventBus.RabbitMq
 			_channelPool = channelPool;
 		}
 
-		private const string Exchange = "eventbus";
-
 		public Task PublishAsync<T>(T @event) where T : IntegrativeEvent
 		{
 			var channel = _channelPool.Get();
-			var routingKey = typeof(T).GetRoutingKey();
+			var exchange = typeof(T).GetExchange();
 
 			try
 			{
 				channel.BasicPublish(
-					exchange: Exchange,
-					routingKey: routingKey,
+					exchange: exchange,
+					routingKey: "",
 					basicProperties: null,
 					body: @event.Serialize());
 
-				_logger.LogTrace("[EventBus] Event raised. Id: {Id}, Exchange: {Exchange}, RoutingKey: {RoutingKey}",
+				_logger.LogTrace("[EventBus] Event raised. Id: {Id}, Exchange: {Exchange}",
 					@event.Id,
-					Exchange);
+					exchange);
 			}
 			catch
 			{
-				_logger.LogError("[EventBus] Faild to raise event. Id: {Id}, Exchange: {Exchange}, RoutingKey: {RoutingKey}",
+				_logger.LogError("[EventBus] Faild to raise event. Id: {Id}, Exchange: {Exchange}",
 					@event.Id,
-					Exchange);
+					exchange);
 			}
 
 			_channelPool.Release(channel);

@@ -2,10 +2,6 @@
 using EventBus.RabbitMq.IntegrationTests.Base;
 using Microsoft.Extensions.Logging.Abstractions;
 using RabbitMQ.Client;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,7 +9,7 @@ using Xunit;
 
 namespace EventBus.RabbitMq.IntegrationTests
 {
-	public class SubscriberTest:IClassFixture<RabbitMqFixture>
+	public class SubscriberTest : IClassFixture<RabbitMqFixture>
 	{
 		private readonly IMessageSubscriber _subscriber;
 		private readonly IConnection _connection;
@@ -34,8 +30,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 			_subscriber.Received((TestIE @event) => receivedEvent = @event);
 
 			#region Publish
-			var exchange = "eventbus";
-			var routingKey = "TestIE";
+			var exchange = "TestIE";
 
 			var json = JsonSerializer.Serialize(@event);
 			var bytes = Encoding.ASCII.GetBytes(json);
@@ -44,7 +39,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 
 			channel.BasicPublish(
 					exchange: exchange,
-					routingKey: routingKey,
+					routingKey: "",
 					basicProperties: null,
 					body: bytes);
 

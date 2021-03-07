@@ -5,13 +5,12 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace EventBus.RabbitMq.IntegrationTests
 {
-	public class PublisherTest:IClassFixture<RabbitMqFixture>
+	public class PublisherTest : IClassFixture<RabbitMqFixture>
 	{
 		private readonly IMessagePublisher _publisher;
 		private readonly IConnection _connection;
@@ -31,8 +30,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 			TestIE receivedEvent = null;
 
 			#region subscribe
-			var exchange = "eventbus";
-			var routingKey = "TestIE";
+			var exchange = "TestIE";
 
 			var channel = _connection.CreateModel();
 
@@ -45,7 +43,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 			channel.QueueBind(
 				queue: queue,
 				exchange: exchange,
-				routingKey: routingKey);
+				routingKey: "");
 
 			var consumer = new EventingBasicConsumer(channel);
 			consumer.Received += (model, ea) =>

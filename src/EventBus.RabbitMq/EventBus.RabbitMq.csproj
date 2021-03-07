@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Amirhossein Fazlikhani</Authors>
+    <RepositoryUrl>https://github.com/AmirhosseinFazlikhani/EventBus</RepositoryUrl>
+    <PackageId>AF.EventBus.RabbitMq</PackageId>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

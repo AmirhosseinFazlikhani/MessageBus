@@ -24,34 +24,32 @@ namespace EventBus.RabbitMq
 
 		private string queue;
 
-		private const string Exchange = "eventbus";
+		public void Connect<T>() where T : IntegrativeEvent => Connect(typeof(T).GetExchange());
 
-		public void Connect<T>() where T : IntegrativeEvent => Connect(typeof(T).GetRoutingKey());
+		public void Connect(Type type) => Connect(type.GetExchange());
 
-		public void Connect(Type type) => Connect(type.GetRoutingKey());
-
-		private void Connect(string routingKey)
+		private void Connect(string exchange)
 		{
 			try
 			{
 				channel = _connection.CreateModel();
 
 				channel.ExchangeDeclare(
-					exchange: Exchange,
+					exchange: exchange,
 					type: ExchangeType.Fanout);
 
 				queue = channel.QueueDeclare().QueueName;
 
 				channel.QueueBind(
 					queue: queue,
-					exchange: Exchange,
-					routingKey: routingKey);
+					exchange: exchange,
+					routingKey: "");
 
-				_logger.LogInformation("[EventBus] Start subscribing. Exchange: {Exchange}", Exchange);
+				_logger.LogInformation("[EventBus] Start subscribing. Exchange: {Exchange}", exchange);
 			}
 			catch
 			{
-				_logger.LogError("[EventBus] Faild to subcribe. Exchange: {Exchange}", Exchange);
+				_logger.LogError("[EventBus] Faild to subcribe. Exchange: {Exchange}", exchange);
 			}
 		}
 
@@ -63,6 +61,8 @@ namespace EventBus.RabbitMq
 
 		public void Received<T>(Action<T> action) where T : IntegrativeEvent
 		{
+			var exchange = typeof(T).GetExchange();
+
 			var consumer = new EventingBasicConsumer(channel);
 			consumer.Received += (model, ea) =>
 			{
@@ -70,15 +70,15 @@ namespace EventBus.RabbitMq
 
 				_logger.LogTrace("[EventBus] Event received. Id: {Id}, Exchange: {Exchange}, CreatedAt: {CreatedAt}",
 					@event.Id,
-					@event.CreateDateTime,
-					Exchange);
+					exchange,
+					@event.CreateDateTime);
 
 				action.Invoke(@event);
 
 				var totalHandleTime = DateTime.Now - @event.CreateDateTime;
 				_logger.LogTrace("[EventBus] Event handled. Id: {Id}, Exchange: {Exchange}, TotalTime: {TotalTime}",
 					@event.Id,
-					Exchange,
+					exchange,
 					totalHandleTime);
 
 				channel.BasicAck(ea.DeliveryTag, false);
