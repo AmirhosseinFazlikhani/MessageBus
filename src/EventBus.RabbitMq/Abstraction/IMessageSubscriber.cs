@@ -2,14 +2,12 @@
 
 namespace EventBus.RabbitMq.Abstractions
 {
-	public interface IMessageSubscriber
+	public interface IMessageSubscriber<T> where T : IntegrativeEvent
 	{
-		void Connect<T>() where T : IntegrativeEvent;
-
-		void Connect(Type type);
+		void Connect();
 
 		void Disconnect();
 
-		void Received<T>(Action<T> action) where T : IntegrativeEvent;
+		void Received(Action<T> action);
 	}
 }

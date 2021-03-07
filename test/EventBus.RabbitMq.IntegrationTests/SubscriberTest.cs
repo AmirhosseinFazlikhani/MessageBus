@@ -11,13 +11,13 @@ namespace EventBus.RabbitMq.IntegrationTests
 {
 	public class SubscriberTest : IClassFixture<RabbitMqFixture>
 	{
-		private readonly IMessageSubscriber _subscriber;
+		private readonly IMessageSubscriber<TestIE> _subscriber;
 		private readonly IConnection _connection;
 
 		public SubscriberTest(RabbitMqFixture fixture)
 		{
 			_connection = fixture.Connection;
-			_subscriber = new MessageSubscriber(_connection, new NullLogger<MessageSubscriber>());
+			_subscriber = new MessageSubscriber<TestIE>(_connection, new NullLogger<MessageSubscriber<TestIE>>());
 		}
 
 		[Fact]
@@ -26,7 +26,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 			var @event = new TestIE();
 			TestIE receivedEvent = null;
 
-			_subscriber.Connect<TestIE>();
+			_subscriber.Connect();
 			_subscriber.Received((TestIE @event) => receivedEvent = @event);
 
 			#region Publish

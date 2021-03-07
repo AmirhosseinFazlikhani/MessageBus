@@ -28,7 +28,7 @@ namespace EventBus.RabbitMq.Extensions
 
 			services.AddSingleton<IChannelPool>(new ChannelPool(connection, 10));
 			services.AddTransient<IMessagePublisher, MessagePublisher>();
-			services.AddTransient<IMessageSubscriber, MessageSubscriber>();
+			services.AddScoped(typeof(IMessageSubscriber<>), typeof(MessageSubscriber<>));
 
 			return services;
 		}

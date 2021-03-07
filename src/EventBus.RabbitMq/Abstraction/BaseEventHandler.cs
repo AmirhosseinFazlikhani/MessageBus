@@ -9,19 +9,17 @@ namespace EventBus.RabbitMq.Abstractions
 	public abstract class BaseEventHandler<T> : BackgroundService where T : IntegrativeEvent
 	{
 		private readonly IServiceScopeFactory _scopeFactory;
-		private readonly IMessageSubscriber _subscriber;
+		private readonly IMessageSubscriber<T> _subscriber;
 
-		protected BaseEventHandler(
-			IServiceScopeFactory scopeFactory,
-			IMessageSubscriber subscriber)
+		protected BaseEventHandler(IServiceScopeFactory scopeFactory)
 		{
 			_scopeFactory = scopeFactory;
-			_subscriber = subscriber;
+			_subscriber = scopeFactory.CreateScope().ServiceProvider.GetService<IMessageSubscriber<T>>();
 		}
 
 		public override Task StartAsync(CancellationToken cancellationToken)
 		{
-			_subscriber.Connect<T>();
+			_subscriber.Connect();
 
 			return Task.CompletedTask;
 		}

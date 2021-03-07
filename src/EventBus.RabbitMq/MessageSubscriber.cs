@@ -7,14 +7,14 @@ using System;
 
 namespace EventBus.RabbitMq
 {
-	public class MessageSubscriber : IMessageSubscriber
+	public class MessageSubscriber<T> : IMessageSubscriber<T> where T : IntegrativeEvent
 	{
 		private readonly IConnection _connection;
-		private readonly ILogger<MessageSubscriber> _logger;
+		private readonly ILogger<MessageSubscriber<T>> _logger;
 
 		public MessageSubscriber(
 			IConnection connection,
-			ILogger<MessageSubscriber> logger)
+			ILogger<MessageSubscriber<T>> logger)
 		{
 			_logger = logger;
 			_connection = connection;
@@ -24,12 +24,10 @@ namespace EventBus.RabbitMq
 
 		private string queue;
 
-		public void Connect<T>() where T : IntegrativeEvent => Connect(typeof(T).GetExchange());
-
-		public void Connect(Type type) => Connect(type.GetExchange());
-
-		private void Connect(string exchange)
+		public void Connect()
 		{
+			string exchange = typeof(T).GetExchange();
+
 			try
 			{
 				channel = _connection.CreateModel();
@@ -59,7 +57,7 @@ namespace EventBus.RabbitMq
 			channel.Dispose();
 		}
 
-		public void Received<T>(Action<T> action) where T : IntegrativeEvent
+		public void Received(Action<T> action)
 		{
 			var exchange = typeof(T).GetExchange();
 
@@ -68,7 +66,7 @@ namespace EventBus.RabbitMq
 			{
 				var @event = ea.Body.Deserialize<T>();
 
-				_logger.LogTrace("[EventBus] Event received. Id: {Id}, Exchange: {Exchange}, CreatedAt: {CreatedAt}",
+				_logger.LogInformation("[EventBus] Event received. Id: {Id}, Exchange: {Exchange}, CreatedAt: {CreatedAt}",
 					@event.Id,
 					exchange,
 					@event.CreateDateTime);
