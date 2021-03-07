@@ -21,7 +21,7 @@ namespace EventBus.RabbitMq.Abstractions
 		{
 			_subscriber.Connect();
 
-			return Task.CompletedTask;
+			return base.StartAsync(cancellationToken);
 		}
 
 		protected override Task ExecuteAsync(CancellationToken stoppingToken)
