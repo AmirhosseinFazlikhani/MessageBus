@@ -27,20 +27,16 @@ public class ExampleClass
 }
 ```
 Event can has unlimited handler. event handlers should inherit from ***BaseEventHandler*** and implement two method:
-- **GetServices**: You can resolve scoped services from a ***IServiceProvider*** that passed to this method.
+- **GetServices**: You can resolve services which register per scope from a ***IServiceProvider***.
 - **Handle**: When received an event which type is equal to event handler generic type, invoke this method.
 ```
 public class TestEH : BaseEventHandler<TestIE>
 {
-	public TestEH(
-		IMessageSubscriber subscriber,
-		IServiceScopeFactory scopeFactory) : base(subscriber, scopeFactory) { }
-
-	private IUnitOfWork _unitOfWork;
+	public TestEH(IServiceScopeFactory scopeFactory) : base(scopeFactory) { }
 
 	public override void GetServices(IServiceProvider serviceProvider)
 	{
-		_unitOfWork = serviceProvider.GetService<IUnitOfWork>();
+		// ...
 	}
     
 	public override void Handle(TestIE @event)
