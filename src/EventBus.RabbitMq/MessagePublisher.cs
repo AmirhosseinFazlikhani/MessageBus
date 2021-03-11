@@ -32,7 +32,7 @@ namespace EventBus.RabbitMq
 					basicProperties: null,
 					body: @event.Serialize());
 
-				_logger.LogInformation("[EventBus] Event raised. Id: {Id}, Exchange: {Exchange}",
+				_logger.LogTrace("[EventBus] Event raised. Id: {Id}, Exchange: {Exchange}",
 					@event.Id,
 					exchange);
 			}

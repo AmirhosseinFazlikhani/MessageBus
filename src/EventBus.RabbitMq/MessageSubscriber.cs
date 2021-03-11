@@ -43,11 +43,11 @@ namespace EventBus.RabbitMq
 					exchange: exchange,
 					routingKey: "");
 
-				_logger.LogInformation("[EventBus] Start subscribing. Exchange: {Exchange}", exchange);
+				_logger.LogInformation("[EventBus] Successfully connected. Exchange: {Exchange}", exchange);
 			}
 			catch
 			{
-				_logger.LogError("[EventBus] Faild to subcribe. Exchange: {Exchange}", exchange);
+				_logger.LogError("[EventBus] Faild to connect. Exchange: {Exchange}", exchange);
 			}
 		}
 
@@ -66,7 +66,7 @@ namespace EventBus.RabbitMq
 			{
 				var @event = ea.Body.Deserialize<T>();
 
-				_logger.LogInformation("[EventBus] Event received. Id: {Id}, Exchange: {Exchange}, CreatedAt: {CreatedAt}",
+				_logger.LogTrace("[EventBus] Event received. Id: {Id}, Exchange: {Exchange}, CreatedAt: {CreatedAt}",
 					@event.Id,
 					exchange,
 					@event.CreateDateTime);
