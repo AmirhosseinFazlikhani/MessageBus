@@ -19,7 +19,7 @@ namespace EventBus.RabbitMq.IntegrationTests
 		{
 			_connection = fixture.Connection;
 
-			var pool = new ChannelPool(_connection, 1);
+			var pool = new ChannelPool(_connection, new NullLogger<ChannelPool>(), new MessagingConfig { MaxChannels=1});
 			_publisher = new MessagePublisher(pool, new NullLogger<MessagePublisher>());
 		}
 

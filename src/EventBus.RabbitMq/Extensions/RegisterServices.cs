@@ -1,5 +1,6 @@
 ﻿using EventBus.RabbitMq.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace EventBus.RabbitMq.Extensions
 
 			services.AddSingleton(connection);
 
-			services.AddSingleton<IChannelPool>(new ChannelPool(connection, config.MaxChannels));
+			services.AddSingleton<IChannelPool, ChannelPool>();
 			services.AddTransient<IMessagePublisher, MessagePublisher>();
 			services.AddScoped(typeof(IMessageSubscriber<>), typeof(MessageSubscriber<>));
 

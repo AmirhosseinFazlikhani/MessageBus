@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using RabbitMQ.Client;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,12 @@ namespace EventBus.RabbitMq.UnitTests
 	public class ChannelPoolTest
 	{
 		private readonly IConnection _connection;
+		private readonly NullLogger<ChannelPool> _logger;
 
 		public ChannelPoolTest()
 		{
+			_logger = new NullLogger<ChannelPool>();
+
 			var mockedConnection = new Mock<IConnection>();
 			mockedConnection.Setup(x => x.CreateModel()).Returns(new Mock<IModel>().Object);
 
@@ -21,7 +25,7 @@ namespace EventBus.RabbitMq.UnitTests
 		[Fact]
 		public void Get_WhenChannelsCountIsMaximum_DoNotCreateNewChannel()
 		{
-			var pool = new ChannelPool(_connection, 1);
+			var pool = new ChannelPool(_connection, _logger, new MessagingConfig { MaxChannels = 1 });
 
 			var channel1 = pool.Get();
 			IModel channel2 = null;
@@ -34,7 +38,7 @@ namespace EventBus.RabbitMq.UnitTests
 		[Fact]
 		public void Get_WhenNotExistsFreeChannel_WaitUtilAChannelReleased()
 		{
-			var pool = new ChannelPool(_connection, 1);
+			var pool = new ChannelPool(_connection, _logger, new MessagingConfig { MaxChannels = 1 });
 
 			var channel1 = pool.Get();
 			IModel channel2 = null;
@@ -49,7 +53,7 @@ namespace EventBus.RabbitMq.UnitTests
 		[Fact]
 		public void Get_WhenNotExistsFreeChannelAndMoreThanOneRequestCome_QueuedRequestsAndWaitUnitChannelsReleased()
 		{
-			var pool = new ChannelPool(_connection, 1);
+			var pool = new ChannelPool(_connection, _logger, new MessagingConfig { MaxChannels = 1 });
 
 			var channel1 = pool.Get();
 			IModel channel2 = null;

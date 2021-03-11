@@ -17,12 +17,12 @@ namespace EventBus.RabbitMq
 		public ChannelPool(
 			IConnection connection,
 			ILogger<ChannelPool> logger,
-			int maxCount)
+			MessagingConfig config)
 		{
 			_logger = logger;
 			_channels = new ConcurrentBag<IModel>();
 			_connection = connection;
-			_maxCount = maxCount;
+			_maxCount = config.MaxChannels;
 		}
 
 		private int _counter = 0;
