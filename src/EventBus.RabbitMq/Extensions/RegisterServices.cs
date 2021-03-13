@@ -16,6 +16,8 @@ namespace EventBus.RabbitMq.Extensions
 		{
 			_items = new List<Item>();
 
+			services.AddSingleton(config);
+
 			var connectionFactory = new ConnectionFactory
 			{
 				HostName = config.HostName,
