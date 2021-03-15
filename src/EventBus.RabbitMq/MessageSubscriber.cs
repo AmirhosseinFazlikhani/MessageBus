@@ -73,7 +73,7 @@ namespace EventBus.RabbitMq
 
 				action.Invoke(@event);
 
-				var totalHandleTime = DateTime.Now - @event.CreateDateTime;
+				var totalHandleTime = DateTime.UtcNow - @event.CreateDateTime;
 				_logger.LogTrace("[EventBus] Event handled. Id: {Id}, Exchange: {Exchange}, TotalTime: {TotalTime}",
 					@event.Id,
 					exchange,
