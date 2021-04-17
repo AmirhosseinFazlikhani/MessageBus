@@ -8,7 +8,7 @@ public class TestEvent : IntegrativeEvent
 	public string Name { get; set; }
 }
 ```
-Use ***IMessagePublisher*** for publish messages:
+Use ***IEventPublisher*** for publish messages:
 ```
 public class ExampleClass
 {
