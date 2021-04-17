@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EventBus.RabbitMq.Concrete
 {
-    public class EventPublisher : IEventPublisher
+    internal class EventPublisher : IEventPublisher
     {
         private readonly IChannelPool _channelPool;
         private readonly ILogger<EventPublisher> _logger;

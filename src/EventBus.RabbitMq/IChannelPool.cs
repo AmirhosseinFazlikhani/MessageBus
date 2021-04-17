@@ -2,7 +2,7 @@
 
 namespace EventBus.RabbitMq
 {
-    public interface IChannelPool
+    internal interface IChannelPool
     {
         void Release(IModel channel);
         IModel Get();

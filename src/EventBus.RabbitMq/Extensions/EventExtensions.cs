@@ -15,9 +15,9 @@ namespace EventBus.RabbitMq.Extensions
 			return JsonSerializer.SerializeToUtf8Bytes(message);
 		}
 
-		public static T Deserialize<T>(this ReadOnlyMemory<byte> content)
+		public static object Deserialize(this ReadOnlyMemory<byte> content, Type type)
 		{
-			return JsonSerializer.Deserialize<T>(content.ToArray());
+			return JsonSerializer.Deserialize(content.ToArray(), type);
 		}
 	}
 }
