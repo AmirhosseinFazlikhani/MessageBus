@@ -1,7 +1,7 @@
 # EventBus
 A simple event bus that use RabbitMq.
 
-All events should be inherit from IntegrativeEvent. You can track events in logs with its unique id that is a Guid.
+All events should be inherit from IntegrativeEvent. You can track events in logs with its unique identifier that's a Guid.
 ```
 public class TestEvent : IntegrativeEvent
 {
@@ -26,22 +26,13 @@ public class ExampleClass
 	}
 }
 ```
-Event can has unlimited handler. event handlers should inherit from ***BaseEventHandler*** and implement two method:
-- **Initialize**: You can resolve services from a ***IServiceProvider***.
-- **Handle**: When received an event which type is equal to event handler generic type, invoke this method.
+Event can has unlimited handlers. event handlers should be implement ***IEventHandler<>***.
 ```
-public class TestEventHandler : IntegrativeEventHandler<TestEvent>
+public class TestEventHandler : IEventHandler<TestEvent>
 {
-	public TestEventHandler(IServiceScopeFactory scopeFactory) : base(scopeFactory) { }
-
-	public override void Initialize(IServiceProvider serviceProvider)
+	public Task HandleAsync(TestEvent @event)
 	{
-		// ...
-	}
-    
-	public override void Handle(TestEvent @event)
-	{
-		// ...
+		
 	}
 }
 ```
@@ -58,14 +49,4 @@ services.AddEventBus(new EventBusSettings
 	Password = "guest",
 	Port = 5672 // Optional
 }
-```
-You can get all registered events and handlers from ***IServiceProvider***:
-```
-var events = services.GetEvents();
-```
-And get all handlers for an event:
-```
-var handlers = services.GetEventHandlers<TestEvent>();
-// or
-var handlers = services.GetEventHandlers(typeof(TestEvent));
 ```
