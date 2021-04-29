@@ -16,8 +16,9 @@ services.AddMessageBus(new MessageBusSettings
     Port = 5672, // Optional, default value is 5672
     MaxConcurrentChannels = 10 // Optional, default value is 10
 });
-Message bus opened a single connection in application lifetime. But can created several channel. RabbitMq channels are not thread safe and must not share in threads. For this reason message bus have a thread safe channel pool that has responsible for building, delivering and retrieving the channels. When application want to publish a message, if a free channel is exists, channel pool delivers it and after published message takes it back. But nothing free channel are exists, channel pool create a new channel. Channels are limited becuse creating channel almost a hard work and takes time and host resources, therefore channel pool creates a limited number of channels. If active channels is maximum, channel pool queues requests.
 ```
+Message bus opened a single connection in application lifetime. But can created several channel. RabbitMq channels are not thread safe and must not share in threads. For this reason message bus have a thread safe channel pool that has responsible for building, delivering and retrieving the channels. When application want to publish a message, if a free channel is exists, channel pool delivers it and after published message takes it back. But nothing free channel are exists, channel pool create a new channel. Channels are limited becuse creating channel almost a hard work and takes time and host resources, therefore channel pool creates a limited number of channels. If active channels is maximum, channel pool queues requests.
+
 ## Events
 All event classes must be inherit from ***IntegrativeEvent***:
 ```cs
