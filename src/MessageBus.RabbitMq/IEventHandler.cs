@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using MessageBus.RabbitMq.Messages;
+using System.Threading.Tasks;
 
-namespace EventBus.RabbitMq
+namespace MessageBus.RabbitMq
 {
     public interface IEventHandler<T> where T : IntegrativeEvent
     {

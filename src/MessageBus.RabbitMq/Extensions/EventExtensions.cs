@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace EventBus.RabbitMq.Extensions
+namespace MessageBus.RabbitMq.Extensions
 {
     internal static class EventExtensions
     {
-        public static string GetExchange(this Type type)
-        {
-            return type.Name;
-        }
+		public static string GetEventExchange(this Type type)
+		{
+			return type.Name;
+		}
+
+		public static string GetCommandQueue(this Type type)
+		{
+			return type.Name;
+		}
 
 		public static byte[] Serialize<T>(this T message)
 		{

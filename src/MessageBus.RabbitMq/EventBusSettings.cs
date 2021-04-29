@@ -1,6 +1,6 @@
-﻿namespace EventBus.RabbitMq
+﻿namespace MessageBus.RabbitMq
 {
-    public class EventBusSettings
+    public class MessageBusSettings
     {
         public string HostName { get; set; }
 

@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace EventBus.RabbitMq
+namespace MessageBus.RabbitMq.Messages
 {
-    public class IntegrativeEvent
+    public abstract class Message
     {
         public Guid Id { get; set; }
 
         public DateTime CreateDateTime { get; set; }
 
-        public IntegrativeEvent()
+        public Message()
         {
             Id = Guid.NewGuid();
             CreateDateTime = DateTime.UtcNow;
         }
 
         [JsonConstructor]
-        public IntegrativeEvent(Guid id, DateTime createDateTime)
+        public Message(Guid id, DateTime createDateTime)
         {
             Id = id;
             CreateDateTime = createDateTime;

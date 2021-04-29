@@ -1,4 +1,4 @@
-﻿using EventBus.RabbitMq.Extensions;
+﻿using MessageBus.RabbitMq.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,22 +8,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static EventBus.RabbitMq.Extensions.ServiceCollectionExtensions;
 
-namespace EventBus.RabbitMq.Concrete
+namespace MessageBus.RabbitMq.Concrete
 {
     internal class EventSubscriber : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IConnection _connection;
         private readonly ILogger<EventSubscriber> _logger;
-        private readonly List<RegisteredCouples> _modules;
+        private readonly IReadOnlyCollection<EventModule> _modules;
 
         public EventSubscriber(
             IServiceScopeFactory scopeFactory,
             IConnection connection,
             ILogger<EventSubscriber> logger,
-            List<RegisteredCouples> modules)
+            IReadOnlyCollection<EventModule> modules)
         {
             _scopeFactory = scopeFactory;
             _connection = connection;
@@ -35,7 +34,7 @@ namespace EventBus.RabbitMq.Concrete
         {
             foreach (var module in _modules)
             {
-                var exchange = module.Event.GetExchange();
+                var exchange = module.Event.GetEventExchange();
 
                 try
                 {
@@ -57,9 +56,7 @@ namespace EventBus.RabbitMq.Concrete
                     {
                         var @event = (dynamic)ea.Body.Deserialize(module.Event);
 
-                        _logger.LogTrace("Event {Id} received from {Exchange}",
-                                (Guid)@event.Id,
-                                exchange);
+                        _logger.LogTrace("Event {Id} received from {Exchange}", (Guid)@event.Id, exchange);
 
                         Task.Run(() =>
                         {
@@ -73,9 +70,9 @@ namespace EventBus.RabbitMq.Concrete
                             }
 
                             _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
+                            channel.BasicAck(ea.DeliveryTag, false);
                         });
 
-                        channel.BasicAck(ea.DeliveryTag, false);
                     };
 
                     channel.BasicConsume(

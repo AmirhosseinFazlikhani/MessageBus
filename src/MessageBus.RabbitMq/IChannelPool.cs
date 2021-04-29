@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 
-namespace EventBus.RabbitMq
+namespace MessageBus.RabbitMq
 {
     internal interface IChannelPool
     {

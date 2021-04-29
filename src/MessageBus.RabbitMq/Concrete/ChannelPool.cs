@@ -4,9 +4,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 
-namespace EventBus.RabbitMq.Concrete
+namespace MessageBus.RabbitMq.Concrete
 {
-    public class ChannelPool : IChannelPool
+    internal class ChannelPool : IChannelPool
     {
         private readonly IConnection _connection;
         private readonly int _maxCount;
@@ -15,7 +15,7 @@ namespace EventBus.RabbitMq.Concrete
 
         public ChannelPool(
             IConnection connection,
-            EventBusSettings settings,
+            MessageBusSettings settings,
             ILogger<ChannelPool> logger)
         {
             _channels = new ConcurrentBag<IModel>();
