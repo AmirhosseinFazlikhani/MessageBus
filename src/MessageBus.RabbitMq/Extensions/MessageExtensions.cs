@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace MessageBus.RabbitMq.Extensions
 {
-    internal static class EventExtensions
+    internal static class MessageExtensions
     {
 		public static string GetEventExchange(this Type type)
 		{

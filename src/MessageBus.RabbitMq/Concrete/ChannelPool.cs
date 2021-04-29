@@ -20,7 +20,7 @@ namespace MessageBus.RabbitMq.Concrete
         {
             _channels = new ConcurrentBag<IModel>();
             _connection = connection;
-            _maxCount = settings.MaxChannels ?? 5;
+            _maxCount = settings.MaxConcurrentChannels;
             _logger = logger;
         }
 
@@ -73,7 +73,6 @@ namespace MessageBus.RabbitMq.Concrete
             if (_channels.Count < _maxCount)
             {
                 _channels.Add(channel);
-                _counter++;
 
                 _logger.LogTrace("Channel {Number} released.", channel.ChannelNumber);
             }

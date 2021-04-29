@@ -28,13 +28,9 @@ namespace MessageBus.RabbitMq.Extensions
             {
                 HostName = settings.HostName,
                 UserName = settings.UserName,
-                Password = settings.Password
+                Password = settings.Password,
+                Port = settings.Port
             };
-
-            if (settings.Port.HasValue)
-            {
-                connectionFactory.Port = settings.Port.Value;
-            }
 
             var connection = connectionFactory.CreateConnection();
 
@@ -65,7 +61,7 @@ namespace MessageBus.RabbitMq.Extensions
             return services;
         }
 
-        public static IServiceCollection AddComandHandler<TCommand, THandler>(this IServiceCollection services)
+        public static IServiceCollection AddCommandHandler<TCommand, THandler>(this IServiceCollection services)
             where TCommand : Command
             where THandler : ICommandHandler<TCommand>
         {
