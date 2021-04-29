@@ -6,7 +6,7 @@ Implementation of command bus and event bus using RabbitMq.
 Install-Package Berg.MessageBus.RabbitMq -Version 5.0.0
 ```
 #  Usage
-At first, you must register message bus in the DI container and enter the rabbitMq server details:
+At first, you must register message bus in the DI container and enter the RabbitMq server details:
 ```cs
 services.AddMessageBus(new MessageBusSettings
 {
