@@ -58,21 +58,17 @@ namespace MessageBus.RabbitMq.Concrete
 
                         _logger.LogTrace("Event {Id} received from {Exchange}", (Guid)@event.Id, exchange);
 
-                        Task.Run(() =>
+                        using (var scope = _scopeFactory.CreateScope())
                         {
-                            using (var scope = _scopeFactory.CreateScope())
-                            {
-                                var service = (dynamic)ActivatorUtilities.CreateInstance(
-                                    scope.ServiceProvider,
-                                    module.Handler);
+                            var service = (dynamic)ActivatorUtilities.CreateInstance(
+                                scope.ServiceProvider,
+                                module.Handler);
 
-                                service.HandleAsync(@event).Wait();
-                            }
+                            service.HandleAsync(@event).Wait();
+                        }
 
-                            _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
-                            channel.BasicAck(ea.DeliveryTag, false);
-                        });
-
+                        _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
+                        channel.BasicAck(ea.DeliveryTag, false);
                     };
 
                     channel.BasicConsume(

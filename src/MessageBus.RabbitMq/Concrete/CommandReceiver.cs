@@ -54,20 +54,17 @@ namespace MessageBus.RabbitMq.Concrete
 
                         _logger.LogTrace("Command {Id} received from {Queue}", (Guid)command.Id, queue);
 
-                        Task.Run(() =>
+                        using (var scope = _scopeFactory.CreateScope())
                         {
-                            using (var scope = _scopeFactory.CreateScope())
-                            {
-                                var type = typeof(ICommandHandler<>);
-                                var typeArgs = new Type[] { command.GetType() };
-                                var serviceType = type.MakeGenericType(typeArgs);
-                                dynamic service = scope.ServiceProvider.GetService(serviceType);
-                                service.HandleAsync(command).Wait();
-                            }
+                            var type = typeof(ICommandHandler<>);
+                            var typeArgs = new Type[] { command.GetType() };
+                            var serviceType = type.MakeGenericType(typeArgs);
+                            dynamic service = scope.ServiceProvider.GetService(serviceType);
+                            service.HandleAsync(command).Wait();
+                        }
 
-                            _logger.LogTrace("Command {Id} handled", (Guid)command.Id);
-                            channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                        });
+                        _logger.LogTrace("Command {Id} handled", (Guid)command.Id);
+                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     };
 
                     channel.BasicConsume(
