@@ -5,9 +5,9 @@ namespace MessageBus.RabbitMq.Messages
 {
     public abstract class Message
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; private set; }
 
-        public DateTime CreateDateTime { get; set; }
+        public DateTime CreateDateTime { get; private set; }
 
         public Message()
         {
