@@ -77,7 +77,8 @@ public class TestCommandHandler : ICommandHandler<TestCommand>
     }
 }
 ```
-If two or more handler registered for a command, it just handle by one of them, but other handlers will not be useless. Consider 4 command was sent and 2 handler registered in application, first command handled by handler1, second command handled by handler2, third command handled by handler1, and fourth command handled by handler2.
+If two or more handler was registered for a command, it just handle by one of them, but other handlers will not be useless. Consider 4 command was sent and 2 handler registered in application, first command handled by handler1, second command handled by handler2, third command handled by handler1, and fourth command handled by handler2.
+**Note:** this scenario is true if command handlers are in different applications. If some handler are in single application, only the last of them always handling commands.
 You can send a command with ***SendAsync()*** method of ***IMessageBus***:
 ```cs
 public class Test
