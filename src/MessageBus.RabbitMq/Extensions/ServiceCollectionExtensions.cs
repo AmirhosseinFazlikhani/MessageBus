@@ -1,6 +1,9 @@
-﻿using MessageBus.RabbitMq.Concrete;
+﻿using MessageBus.RabbitMq.Concretes;
 using MessageBus.RabbitMq.Messages;
+using MessageBus.RabbitMq.Modules.Storage;
+using MessageBus.RabbitMq.Modules.Storage.Concretes;
 using Microsoft.Extensions.DependencyInjection;
+using Nest;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -17,7 +20,7 @@ namespace MessageBus.RabbitMq.Extensions
 
         private static IReadOnlyCollection<CommandModule> CommandModules => _commandModules;
 
-        public static IServiceCollection AddMessageBus(this IServiceCollection services, MessageBusSettings settings)
+        public static IMessageBusService AddMessageBus(this IServiceCollection services, MessageBusSettings settings)
         {
             _eventModules = new List<EventModule>();
             _commandModules = new List<CommandModule>();
@@ -43,9 +46,9 @@ namespace MessageBus.RabbitMq.Extensions
             services.AddHostedService<CommandReceiver>();
 
             services.AddSingleton<IChannelPool, ChannelPool>();
-            services.AddTransient<IMessageBus, Concrete.MessageBus>();
+            services.AddTransient<IMessageBus, Concretes.MessageBus>();
 
-            return services;
+            return new MessageBusService(settings, services);
         }
 
         public static IServiceCollection AddEventHandler<TEvent, THandler>(this IServiceCollection services)
@@ -69,6 +72,21 @@ namespace MessageBus.RabbitMq.Extensions
             _commandModules.Add(new CommandModule { Command = typeof(TCommand) });
 
             return services;
+        }
+
+        public static IMessageBusService AddElasticsearch(this IMessageBusService messageBus)
+        {
+            var node = new Uri(messageBus.Settings.Elasticsearch.Node);
+            var connection = new ConnectionSettings(node).BasicAuthentication(
+                messageBus.Settings.Elasticsearch.User,
+                messageBus.Settings.Elasticsearch.Password);
+
+            var client = new ElasticClient(connection);
+
+            messageBus.Services.AddSingleton<IElasticClient>(client);
+            messageBus.Services.AddTransient<IMessageStorage, ElasticStorage>();
+
+            return messageBus;
         }
     }
 

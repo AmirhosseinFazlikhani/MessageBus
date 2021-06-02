@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 
-namespace MessageBus.RabbitMq.Concrete
+namespace MessageBus.RabbitMq.Concretes
 {
     internal class ChannelPool : IChannelPool
     {
