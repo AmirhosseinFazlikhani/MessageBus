@@ -5,7 +5,7 @@ Implementation of command bus and event bus using RabbitMq.
 ```
 Install-Package Berg.MessageBus.RabbitMq -Version 5.0.0
 ```
-#  Usage
+# Usage
 At first, you must register message bus in the DI container and enter the RabbitMq server details:
 ```cs
 services.AddMessageBus(new MessageBusSettings
@@ -37,7 +37,7 @@ public class TestEventHandler : IEventHandler<TestEvent>
     }
 }
 ```
-When an event published, are received by all its handlers. You can publish an event with ***PublishAsync()*** method of ***IMessageBus***:
+When an event published, are received by all its handlers. You can publish an event by ***PublishAsync()*** of ***IMessageBus***:
 ```cs
 public class Test
 {
@@ -79,7 +79,7 @@ public class TestCommandHandler : ICommandHandler<TestCommand>
 ```
 If two or more handler was registered for a command, it just handle by one of them, but other handlers will not be useless. Consider 4 command was sent and 2 handler registered in application, first command handled by handler1, second command handled by handler2, third command handled by handler1, and fourth command handled by handler2.
 **Note:** this scenario is true if command handlers are in different applications. If some handler are in single application, only the last of them always handling commands.
-You can send a command with ***SendAsync()*** method of ***IMessageBus***:
+You can send a command by ***SendAsync()*** of ***IMessageBus***:
 ```cs
 public class Test
 {
@@ -99,4 +99,24 @@ public class Test
 Command handlers must be register in application startup:
 ```cs
 services.AddCommandHandler<TestCommand, TestCommandHandler>();
+```
+# Storing messages
+You can store all outbox and inbox messages to Elasticsearch (MongoDb is available in the future). Enter Elasticsearch settings:
+```cs
+services.AddMessageBus(new MessageBusSettings
+{
+    // Required settings, see at the beginning of the document
+    Application = "Test", // Current application name
+    Elasticsearch = new ElasticserachSettings
+    {
+        Node = "http://localhost:9200", // Working with cluster is available in the future
+        User = "user",
+        Password = "password",
+	Index = "messagebus" // Optional, default value is messagebus
+    }
+}).AddElasticsearch();
+```
+You can read stored messages by ***GetAsync()*** of ***IMessageStorage***.
+```cs
+(awaitable) Task<IReadOnlyCollection<MessageData>> GetAsync([int from = 0], [int size = 50], [OperationType? type = null], [OperationStatus? status = null], [Type message = null])
 ```
