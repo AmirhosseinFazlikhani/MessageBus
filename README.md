@@ -41,17 +41,17 @@ When an event published, are received by all its handlers. You can publish an ev
 ```cs
 public class Test
 {
-	private readonly IMessageBus _messageBus;
+    private readonly IMessageBus _messageBus;
 
-	public Test(IMessageBus messageBus)
-	{
-	        _messageBus = messageBus;
-	}
+    public Test(IMessageBus messageBus)
+    {
+        _messageBus = messageBus;
+    }
 
-	public async void Publish()
-	{
-	    await _messageBus.PublishAsync(new TestEvent());
-	}
+    public async void Publish()
+    {
+        await _messageBus.PublishAsync(new TestEvent());
+    }
 }
 ```
 Event handlers must be register in application startup:
@@ -83,17 +83,17 @@ You can send a command by ***SendAsync()*** of ***IMessageBus***:
 ```cs
 public class Test
 {
-	private readonly IMessageBus _messageBus;
+    private readonly IMessageBus _messageBus;
 
-	public Test(IMessageBus messageBus)
-	{
-	        _messageBus = messageBus;
-	}
+    public Test(IMessageBus messageBus)
+    {
+        _messageBus = messageBus;
+    }
 
-	public async void Send()
-	{
-	    await _messageBus.SendAsync(new TestCommand());
-	}
+    public async void Send()
+    {
+        await _messageBus.SendAsync(new TestCommand());
+    }
 }
 ```
 Command handlers must be register in application startup:
