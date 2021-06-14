@@ -2,7 +2,9 @@
 using MessageBus.RabbitMq.Messages;
 using MessageBus.RabbitMq.Modules.Storage;
 using MessageBus.RabbitMq.Modules.Storage.Concretes;
+using MessageBus.RabbitMq.Modules.Storage.Models;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Nest;
 using RabbitMQ.Client;
 using System;
@@ -85,6 +87,18 @@ namespace MessageBus.RabbitMq.Extensions
 
             messageBus.Services.AddSingleton<IElasticClient>(client);
             messageBus.Services.AddTransient<IMessageStorage, ElasticStorage>();
+
+            return messageBus;
+        }
+
+        public static IMessageBusService AddMongo(this IMessageBusService messageBus)
+        {
+            var client = new MongoClient(messageBus.Settings.Mongo.ConnectionString);
+            var database = client.GetDatabase(messageBus.Settings.Mongo.Database);
+            var collection = database.GetCollection<MessageData>(messageBus.Settings.Mongo.Collection);
+
+            messageBus.Services.AddSingleton(collection);
+            messageBus.Services.AddTransient<IMessageStorage, MongoStorage>();
 
             return messageBus;
         }

@@ -15,6 +15,8 @@
         public string Application { get; set; }
 
         public ElasticserachSettings Elasticsearch { get; set; }
+
+        public MongoSettings Mongo { get; set; }
     }
 
     public class ElasticserachSettings
@@ -26,5 +28,14 @@
         public string Password { get; set; }
 
         public string Index { get; set; } = "messagebus";
+    }
+
+    public class MongoSettings
+    {
+        public string ConnectionString { get; set; }
+
+        public string Database { get; set; }
+
+        public string Collection { get; set; } = "messages";
     }
 }

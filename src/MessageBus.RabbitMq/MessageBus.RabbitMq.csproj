@@ -5,13 +5,14 @@
     <Authors>Amirhossein Fazlikhani</Authors>
     <RepositoryUrl>https://github.com/AmirhosseinFazlikhani/MessageBus</RepositoryUrl>
     <PackageId>Berg.MessageBus.RabbitMq</PackageId>
-    <Version>5.0.0</Version>
+    <Version>5.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.12.4" />
     <PackageReference Include="NEST" Version="7.13.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
   </ItemGroup>
