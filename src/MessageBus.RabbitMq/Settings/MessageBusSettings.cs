@@ -1,4 +1,6 @@
-﻿namespace MessageBus.RabbitMq
+﻿using System;
+
+namespace MessageBus.RabbitMq
 {
     public class MessageBusSettings
     {
@@ -11,6 +13,10 @@
         public string Password { get; set; }
 
         public int MaxConcurrentChannels { get; set; } = 10;
+
+        public bool AutomaticRecovery { get; set; } = true;
+
+        public TimeSpan RecoveryInterval { get; set; } = TimeSpan.FromSeconds(5);
 
         public string Application { get; set; }
 

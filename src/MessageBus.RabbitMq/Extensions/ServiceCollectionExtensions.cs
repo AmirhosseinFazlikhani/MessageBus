@@ -37,6 +37,9 @@ namespace MessageBus.RabbitMq.Extensions
                 Port = settings.Port
             };
 
+            connectionFactory.AutomaticRecoveryEnabled = settings.AutomaticRecovery;
+            connectionFactory.NetworkRecoveryInterval = settings.RecoveryInterval;
+
             var connection = connectionFactory.CreateConnection();
 
             services.AddSingleton(connection);
