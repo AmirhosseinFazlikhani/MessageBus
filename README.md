@@ -101,7 +101,7 @@ Command handlers must be register in application startup:
 services.AddCommandHandler<TestCommand, TestCommandHandler>();
 ```
 # Storing messages
-You can store all outbox and inbox messages to Elasticsearch (MongoDb is available in the future). Enter Elasticsearch settings:
+You can store all outbox and inbox messages to Elasticsearch or MongoDb.
 ```cs
 services.AddMessageBus(new MessageBusSettings
 {
@@ -109,12 +109,26 @@ services.AddMessageBus(new MessageBusSettings
     Application = "Test", // Current application name
     Elasticsearch = new ElasticserachSettings
     {
-        Node = "http://localhost:9200", // Working with cluster is available in the future
+        Node = "http://localhost:9200",
         User = "user",
         Password = "password",
 	Index = "messagebus" // Optional, default value is messagebus
     }
 }).AddElasticsearch();
+
+// Or
+
+services.AddMessageBus(new MessageBusSettings
+{
+    // Required settings, see at the beginning of the document
+    Application = "Test", // Current application name
+    Mongo = new MongoSettings
+    {
+        ConnectionString = "mongodb://localhost:27017",
+        Database = "messagebus",
+	Collection = "messages" // Optional, default value is messages
+    }
+}).AddMongo();
 ```
 You can read stored messages by ***GetAsync()*** of ***IMessageStorage***.
 ```cs
