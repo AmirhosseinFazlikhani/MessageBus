@@ -1,6 +1,5 @@
 ﻿using MessageBus.RabbitMq.Modules.Storage.Enums;
 using MessageBus.RabbitMq.Modules.Storage.Models;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System;
@@ -22,6 +21,12 @@ namespace MessageBus.RabbitMq.Modules.Storage.Concretes
         {
             _collection = collection;
             _settings = settings;
+        }
+
+        public async Task<IReadOnlyCollection<MessageData>> FindAsync(Guid id)
+        {
+            var cursor = await _collection.FindAsync(x => x.MessageId == id);
+            return await cursor.ToListAsync();
         }
 
         public async Task<IReadOnlyCollection<MessageData>> GetAsync(

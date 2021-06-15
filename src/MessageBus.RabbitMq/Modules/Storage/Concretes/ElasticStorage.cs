@@ -99,5 +99,20 @@ namespace MessageBus.RabbitMq.Modules.Storage.Concretes
             var data = await _client.SearchAsync<MessageData>(search);
             return data.Documents;
         }
+
+        public async Task<IReadOnlyCollection<MessageData>> FindAsync(Guid id)
+        {
+            var search = new SearchDescriptor<MessageData>()
+                .Index(_settings.Elasticsearch.Index)
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.MessageId)
+                        .Query(id.ToString())
+                        )
+                    );
+
+            var daat = await _client.SearchAsync<MessageData>(search);
+            return daat.Documents;
+        }
     }
 }

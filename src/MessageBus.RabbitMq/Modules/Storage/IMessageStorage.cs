@@ -12,5 +12,7 @@ namespace MessageBus.RabbitMq.Modules.Storage
         internal Task SaveAsync<T>(T message, OperationType type, OperationStatus status) where T : Message;
 
         Task<IReadOnlyCollection<MessageData>> GetAsync(int from = 0, int size = 50, OperationType? type = null, OperationStatus? status = null, Type message = null);
+
+        Task<IReadOnlyCollection<MessageData>> FindAsync(Guid id);
     }
 }
