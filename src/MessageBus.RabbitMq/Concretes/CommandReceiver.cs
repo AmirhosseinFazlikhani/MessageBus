@@ -73,12 +73,12 @@ namespace MessageBus.RabbitMq.Concretes
                             channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 
                             _logger.LogTrace("Command {Id} handled", (Guid)command.Id);
-                            _storage.SaveAsync(command, OperationType.Receive, OperationStatus.Succeeded).Wait();
+                            _storage.Save(command, OperationType.Receive, OperationStatus.Succeeded);
                         }
                         catch (Exception exp)
                         {
                             _logger.LogError(exp, "An exception was thrown while handling command {CommandId}", (Guid)command.Id);
-                            _storage.SaveAsync(command, OperationType.Receive, OperationStatus.Failed).Wait();
+                            _storage.Save(command, OperationType.Receive, OperationStatus.Failed);
                         }
                     };
 

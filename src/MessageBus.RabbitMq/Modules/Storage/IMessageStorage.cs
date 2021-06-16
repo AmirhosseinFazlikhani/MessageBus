@@ -9,7 +9,7 @@ namespace MessageBus.RabbitMq.Modules.Storage
 {
     public interface IMessageStorage
     {
-        internal Task SaveAsync<T>(T message, OperationType type, OperationStatus status) where T : Message;
+        internal void Save<T>(T message, OperationType type, OperationStatus status, Type handler = null) where T : Message;
 
         Task<IReadOnlyCollection<MessageData>> GetAsync(int from = 0, int size = 50, OperationType? type = null, OperationStatus? status = null, Type message = null);
 

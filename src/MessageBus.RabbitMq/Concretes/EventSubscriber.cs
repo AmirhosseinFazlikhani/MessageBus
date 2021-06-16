@@ -1,6 +1,7 @@
 ﻿using MessageBus.RabbitMq.Extensions;
 using MessageBus.RabbitMq.Modules.Storage;
 using MessageBus.RabbitMq.Modules.Storage.Enums;
+using MessageBus.RabbitMq.Modules.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -20,20 +21,25 @@ namespace MessageBus.RabbitMq.Concretes
         private readonly ILogger<EventSubscriber> _logger;
         private readonly IReadOnlyCollection<EventModule> _modules;
         private readonly IMessageStorage _storage;
+        private readonly IMessageValidation _validation;
 
         public EventSubscriber(
             IServiceScopeFactory scopeFactory,
             IConnection connection,
             ILogger<EventSubscriber> logger,
             IReadOnlyCollection<EventModule> modules,
-            IMessageStorage storage = null)
+            IMessageStorage storage = null,
+            IMessageValidation validation = null)
         {
             _scopeFactory = scopeFactory;
             _connection = connection;
             _logger = logger;
             _modules = modules;
             _storage = storage;
+            _validation = validation;
         }
+
+        private volatile object _lock = new object();
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -59,30 +65,35 @@ namespace MessageBus.RabbitMq.Concretes
                     var consumer = new EventingBasicConsumer(channel);
                     consumer.Received += (model, ea) =>
                     {
-                        var @event = (dynamic)ea.Body.Deserialize(module.Event);
-
-                        _logger.LogTrace("Event {Id} received from {Exchange}", (Guid)@event.Id, exchange);
-
-                        try
+                        lock (_lock)
                         {
-                            using (var scope = _scopeFactory.CreateScope())
+                            var @event = (dynamic)ea.Body.Deserialize(module.Event);
+
+                            _logger.LogTrace("Event {Id} received from {Exchange}", (Guid)@event.Id, exchange);
+
+                            try
                             {
-                                var service = (dynamic)ActivatorUtilities.CreateInstance(
-                                    scope.ServiceProvider,
-                                    module.Handler);
+                                _validation?.ThrowIfDuplicate(@event, module.Handler);
 
-                                service.HandleAsync(@event).Wait();
+                                using (var scope = _scopeFactory.CreateScope())
+                                {
+                                    var service = (dynamic)ActivatorUtilities.CreateInstance(
+                                        scope.ServiceProvider,
+                                        module.Handler);
+
+                                    service.HandleAsync(@event).Wait();
+                                }
+
+                                channel.BasicAck(ea.DeliveryTag, false);
+
+                                _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
+                                _storage.Save(@event, OperationType.Receive, OperationStatus.Succeeded, module.Handler);
                             }
-
-                            channel.BasicAck(ea.DeliveryTag, false);
-
-                            _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
-                            _storage.SaveAsync(@event, OperationType.Receive, OperationStatus.Succeeded).Wait();
-                        }
-                        catch (Exception exp)
-                        {
-                            _logger.LogError(exp, "An exception was thrown while handling event {EventId}", (Guid)@event.Id);
-                            _storage.SaveAsync(@event, OperationType.Receive, OperationStatus.Failed).Wait();
+                            catch (Exception exp)
+                            {
+                                _logger.LogError(exp, "An exception was thrown while handling event {EventId}", (Guid)@event.Id);
+                                _storage.Save(@event, OperationType.Receive, OperationStatus.Failed, module.Handler);
+                            }
                         }
                     };
 

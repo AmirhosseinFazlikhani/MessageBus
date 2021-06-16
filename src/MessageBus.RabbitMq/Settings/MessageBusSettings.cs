@@ -18,6 +18,8 @@ namespace MessageBus.RabbitMq
 
         public TimeSpan RecoveryInterval { get; set; } = TimeSpan.FromSeconds(5);
 
+        public bool IgnoreDuplicateMessage { get; set; } = false;
+
         public string Application { get; set; }
 
         public ElasticserachSettings Elasticsearch { get; set; }

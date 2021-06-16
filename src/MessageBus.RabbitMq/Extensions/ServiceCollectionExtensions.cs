@@ -3,6 +3,8 @@ using MessageBus.RabbitMq.Messages;
 using MessageBus.RabbitMq.Modules.Storage;
 using MessageBus.RabbitMq.Modules.Storage.Concretes;
 using MessageBus.RabbitMq.Modules.Storage.Models;
+using MessageBus.RabbitMq.Modules.Validation;
+using MessageBus.RabbitMq.Modules.Validation.Concretes;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Nest;
@@ -52,6 +54,9 @@ namespace MessageBus.RabbitMq.Extensions
 
             services.AddSingleton<IChannelPool, ChannelPool>();
             services.AddTransient<IMessageBus, Concretes.MessageBus>();
+
+            if (settings.IgnoreDuplicateMessage)
+                services.AddTransient<IMessageValidation, MessageValidation>();
 
             return new MessageBusService(settings, services);
         }

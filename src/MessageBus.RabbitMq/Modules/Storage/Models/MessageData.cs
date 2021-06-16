@@ -17,6 +17,8 @@ namespace MessageBus.RabbitMq.Modules.Storage.Models
 
         public string ClrType { get; set; }
 
+        public string Handler { get; set; }
+
         public string Body { get; set; }
 
         public OperationStatus Status { get; set; }

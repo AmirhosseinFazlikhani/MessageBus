@@ -1,4 +1,5 @@
-﻿using MessageBus.RabbitMq.Modules.Storage.Enums;
+﻿using MessageBus.RabbitMq.Messages;
+using MessageBus.RabbitMq.Modules.Storage.Enums;
 using MessageBus.RabbitMq.Modules.Storage.Models;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -50,10 +51,11 @@ namespace MessageBus.RabbitMq.Modules.Storage.Concretes
             return await query.Skip(from).Take(size).ToListAsync();
         }
 
-        async Task IMessageStorage.SaveAsync<T>(
+        void IMessageStorage.Save<T>(
             T message,
             OperationType type,
-            OperationStatus status)
+            OperationStatus status,
+            Type handler)
         {
             var document = new MessageData
             {
@@ -62,13 +64,14 @@ namespace MessageBus.RabbitMq.Modules.Storage.Concretes
                 DateTime = DateTime.UtcNow,
                 Application = _settings.Application,
                 ClrType = message.GetType().AssemblyQualifiedName,
+                Handler = handler?.FullName,
                 Host = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(),
                 Status = status,
                 Type = type,
                 Body = JsonSerializer.Serialize(message),
             };
 
-            await _collection.InsertOneAsync(document);
+            _collection.InsertOne(document);
         }
     }
 }
