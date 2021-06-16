@@ -1,5 +1,4 @@
-﻿using MessageBus.RabbitMq.Messages;
-using MessageBus.RabbitMq.Modules.Storage.Enums;
+﻿using MessageBus.RabbitMq.Modules.Storage.Enums;
 using MessageBus.RabbitMq.Modules.Storage.Models;
 using Microsoft.Extensions.Logging;
 using Nest;

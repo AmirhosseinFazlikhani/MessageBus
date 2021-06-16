@@ -87,12 +87,12 @@ namespace MessageBus.RabbitMq.Concretes
                                 channel.BasicAck(ea.DeliveryTag, false);
 
                                 _logger.LogTrace("Event {Id} handled", (Guid)@event.Id);
-                                _storage.Save(@event, OperationType.Receive, OperationStatus.Succeeded, module.Handler);
+                                _storage?.Save(@event, OperationType.Receive, OperationStatus.Succeeded, module.Handler);
                             }
                             catch (Exception exp)
                             {
                                 _logger.LogError(exp, "An exception was thrown while handling event {EventId}", (Guid)@event.Id);
-                                _storage.Save(@event, OperationType.Receive, OperationStatus.Failed, module.Handler);
+                                _storage?.Save(@event, OperationType.Receive, OperationStatus.Failed, module.Handler);
                             }
                         }
                     };

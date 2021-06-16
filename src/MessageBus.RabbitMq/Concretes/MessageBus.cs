@@ -42,7 +42,7 @@ namespace MessageBus.RabbitMq.Concretes
                     @event.Id,
                     exchange);
 
-                Task.Run(() => _storage.Save(@event, OperationType.Send, OperationStatus.Succeeded));
+                Task.Run(() => _storage?.Save(@event, OperationType.Send, OperationStatus.Succeeded));
             }
             catch
             {
@@ -50,7 +50,7 @@ namespace MessageBus.RabbitMq.Concretes
                     @event.Id,
                     exchange);
 
-                Task.Run(() => _storage.Save(@event, OperationType.Send, OperationStatus.Failed));
+                Task.Run(() => _storage?.Save(@event, OperationType.Send, OperationStatus.Failed));
             }
 
             _channelPool.Release(channel);
@@ -81,7 +81,7 @@ namespace MessageBus.RabbitMq.Concretes
                     command.Id,
                     queue);
 
-                Task.Run(() => _storage.Save(command, OperationType.Send, OperationStatus.Succeeded));
+                Task.Run(() => _storage?.Save(command, OperationType.Send, OperationStatus.Succeeded));
             }
             catch (Exception exp)
             {
@@ -89,7 +89,7 @@ namespace MessageBus.RabbitMq.Concretes
                     command.Id,
                     queue);
 
-                Task.Run(() => _storage.Save(command, OperationType.Send, OperationStatus.Failed));
+                Task.Run(() => _storage?.Save(command, OperationType.Send, OperationStatus.Failed));
             }
 
             _channelPool.Release(channel);
