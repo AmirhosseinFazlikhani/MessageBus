@@ -17,7 +17,7 @@ namespace MessageBus.RabbitMq.Concretes
 
         public MessageBus(
             IChannelPool channelPool,
-            ILogger<MessageBus> logger, 
+            ILogger<MessageBus> logger,
             IMessageStorage storage = null)
         {
             _channelPool = channelPool;
@@ -25,7 +25,7 @@ namespace MessageBus.RabbitMq.Concretes
             _storage = storage;
         }
 
-        public async Task PublishAsync<T>(T @event) where T : IntegrativeEvent
+        public Task PublishAsync<T>(T @event) where T : IntegrativeEvent
         {
             var channel = _channelPool.Get();
             var exchange = typeof(T).GetEventExchange();
@@ -42,7 +42,7 @@ namespace MessageBus.RabbitMq.Concretes
                     @event.Id,
                     exchange);
 
-                await _storage.SaveAsync(@event, OperationType.Send, OperationStatus.Succeeded);
+                Task.Run(() => _storage.Save(@event, OperationType.Send, OperationStatus.Succeeded));
             }
             catch
             {
@@ -50,13 +50,15 @@ namespace MessageBus.RabbitMq.Concretes
                     @event.Id,
                     exchange);
 
-                await _storage.SaveAsync(@event, OperationType.Send, OperationStatus.Failed);
+                Task.Run(() => _storage.Save(@event, OperationType.Send, OperationStatus.Failed));
             }
 
             _channelPool.Release(channel);
+
+            return Task.CompletedTask;
         }
 
-        public async Task SendAsync<T>(T command) where T : Command
+        public Task SendAsync<T>(T command) where T : Command
         {
             var queue = typeof(T).GetCommandQueue();
             var channel = _channelPool.Get();
@@ -79,7 +81,7 @@ namespace MessageBus.RabbitMq.Concretes
                     command.Id,
                     queue);
 
-                await _storage.SaveAsync(command, OperationType.Send, OperationStatus.Succeeded);
+                Task.Run(() => _storage.Save(command, OperationType.Send, OperationStatus.Succeeded));
             }
             catch (Exception exp)
             {
@@ -87,10 +89,12 @@ namespace MessageBus.RabbitMq.Concretes
                     command.Id,
                     queue);
 
-                await _storage.SaveAsync(command, OperationType.Send, OperationStatus.Failed);
+                Task.Run(() => _storage.Save(command, OperationType.Send, OperationStatus.Failed));
             }
 
             _channelPool.Release(channel);
+
+            return Task.CompletedTask;
         }
     }
 }
