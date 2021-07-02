@@ -3,134 +3,196 @@ Implementation of command bus and event bus using RabbitMq.
 
 ## Nuget
 ```
-Install-Package Berg.MessageBus.RabbitMq -Version 5.0.0
+Install-Package Berg.MessageBus.RabbitMq -Version <version>
 ```
 # Usage
 At first, you must register message bus in the DI container and enter the RabbitMq server details:
 ```cs
-services.AddMessageBus(new MessageBusSettings
+services.AddMessageBus(messagebus =>
 {
-    HostName = "localhost",
-    UserName = "guest",
-    Password = "guest",
-    Port = 5672, // Optional, default value is 5672
-    MaxConcurrentChannels = 10 // Optional, default value is 10
+	messagebus.ReadSettings(Configuration);
+
+	messagebus.ConfigurePublisher(publisher =>
+	{
+		publisher.UseRouting();
+
+		publisher.UseEventPublisher();
+		publisher.UseCommandPublisher();
+	});
+
+	messagebus.ConfigureSubscriber(subscriber =>
+	{
+		subscriber.UseRouting();
+
+		subscriber.UseEventSubscriber();
+		subscriber.UseCommandSubscriber();
+	});
 });
 ```
-Message bus opened a single connection in application lifetime. But can created several channel. RabbitMq channels are not thread safe and must not share in threads. For this reason message bus have a thread safe channel pool that has responsible for building, delivering and retrieving the channels. When application want to publish a message, if a free channel is exists, channel pool delivers it and after published message takes it back. But nothing free channel are exists, channel pool create a new channel. Channels are limited becuse creating channel almost a hard work and takes time and host resources, therefore channel pool creates a limited number of channels. If active channels is maximum, channel pool queues requests.
-
-## Events
-All event classes must be inherit from ***IntegrativeEvent***:
-```cs
-public class TestEvent : IntegrativeEvent
-{
-    public string Name { get; set; }
+MessageBus read settings from ```appsettings.json```. You must be pass ```IConfiguration``` to it.
+``` json
+"MessageBus": {
+	"HostName": "localhost",
+	"Port": 6572,
+	"UserName": "guest",
+	"Password": "guest",
+	"AutomaticRecovery": true, // default value is true
+	"RecoveryInterval": "00:00:05" // default value is 5s
 }
 ```
-An event can have several handler. Event handler is a class that implement ***IEventHandler<>***:
-```cs
+If the connection is lost for any reason, application can try to recover it if *AutomaticRecovery* option is enabled.
+MessageBus has a abstraction for publishing and subscribing message. You can implement these or use default implementation. In This instance of configuration, subscriber and publisher uses default implementaion for events and commands.
+MessageBus supports middlewares. When a message is published, publishing middlewares are executed in order. ```RouterMiddleware``` must be executed last of all because it route message to its publisher, but don't call the next middleware. And in subscribing pipeline, ```RouterMiddleware``` route the received message to its handlers.
+
+## Middlewares
+A middleware is a class that implemented ```IMiddleware``` interface.
+``` cs
+public class LoggerMiddleware : IMiddleware
+{
+	private readonly ILogger<LoggerMiddleware> logger;
+
+	public LoggerMiddleware(ILogger<LoggerMiddleware> logger)
+	{
+		this.logger = logger;
+	}
+
+	public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
+	{
+		logger.LogInformation(message.GetHashCode().ToString());
+		await context.Next(message);
+	}
+}
+```
+For add a middleware to publisher or subscriber pipeline, must use extension method ```UseMiddlware``` in configure pipelines section.
+``` cs
+messagebus.ConfigurePublisher(publisher =>
+{
+	publisher.UseMiddleware<LoggerMiddleware>();
+});
+
+messagebus.ConfigureSubscriber(subscriber =>
+{
+	subscriber.UseMiddleware<LoggerMiddleware>();
+});
+```
+**Not:** A middleware can be added in both pipelines.
+
+## Messages
+All messages inherit from ```IMessage``` interface. But they are in two type: command & event. Commands after publishing placed in a specific queue and can has just one handler in the application. If the application is run in multiple instances, command handled in order by one of these. For example, we 2 instance of the application and ```SendEmailCommand``` published 3 times. The first time, command handled by instance 1, next time handled by instance 2, and the third time handled by instance 1. But events handled by all its handlers in all applications. For example, we have two microservice that proccess the new orders that the first microservice contains three handlers for the event and second microservice contains one handler. ```OrderCreatedEvent``` is published. This event received by four handlers, Three times in first microservice handlers and one time in second microservice.
+Commands must be inherit from ```ICommand``` and events from ```IEvent```.
+
+## Publishers
+Each type of message has its own publisher. Publishers must be implement ```IPublisher<>```. For instance, a event publisher:
+``` cs
+public class EventPublisher : IPublisher<IEvent>
+{
+	public Task PublishAsync(IEvent message)
+	{
+	
+	}
+}
+```
+MessageBus has a default publisher for events and commands. But if you want to use your own implementation, must be register it in configure publisher section by extension method ```UsePublisher```.
+``` cs
+messagebus.ConfigurePublisher(publisher =>
+{
+	publisher.UsePublisher<IEvent, MyEventPublisher>();
+	publisher.UsePublisher<ICommand, MyCommandPublisher>();
+});
+```
+You have to consider that you can not create a connection to rabbitmq server. Application has a single connection in its lifetime that created in startup. For publish message, you can use ```IChannelPool``` for get a channel. At the end of publish process, the taken channel must be returned to the pool.
+``` cs
+public class EventPublisher : IPublisher<IEvent>
+{
+	private readonly IChannelPool channelPool;
+	
+	public EventPublisher(IChannelPool channelPool)
+	{
+		this.channelPool = channelPool;
+	}
+
+	public async Task PublishAsync(IEvent message)
+	{
+		var channel = channelPool.Get();
+		
+		// publish meesage
+		
+		channelPool.Release(channel);
+	}
+}
+```
+
+## Subscribers
+Each type of message has its own subscriber. Subscibers must be implement ```Subscriber<>```. For instance, a event subscriber:
+``` cs
+public class EventSubscriber : Subscriber<IEvent>
+{
+	public EventSubscriber(
+		IChannelPool channelPool,
+		HandlersStorage handlersStorage,
+		MiddlewaresStorage middlewaresStorage,
+		IServiceProvider serviceProvider) : base(
+			channelPool,
+			handlersStorage,
+			middlewaresStorage,
+			serviceProvider) { }
+
+        protected override void Subscribe(Type messageType, IModel channel)
+        {
+		
+	}
+}
+```
+Consider two event (```FirstTestEvent```, ```SecondTestEvent```) registered in application with its handlers. When the application runs, subscribe method is called two times. In the first time, ```messageType``` is type of ```FirstTestEvent``` and channel is a free channel that taked from channel pool. Subscribers is singleton and long-running process in application and no need to release channel. Because they need the channel while application is running. When a message was received, subscriber must be call ```HandleMessage(IMessage message)``` so that message is processed by middlewares.
+Subscribers must be register in subscriber configuration section:
+``` cs
+messagebus.ConfigureSubscriber(subscriber =>
+{
+	subscriber.UseSubscriber<IEvent, MyEventSubscriber>();
+	subscriber.UseSubscriber<ICommand, MyCommandSubscriber>();
+});
+```
+
+## Publishing and handling message
+```IMessagePublisher``` puts the message in pipeline.  You can use this module for publish any message.
+``` cs
+public class Test{
+	private readonly IMessagePublisher publisher;
+
+	public Test(IMessagePublisher publisher)
+	{
+	    this.publisher = publisher;
+	}
+	
+	publiic async Task TestPublish()
+	{
+		await publisher.PublishAsync(new TestEvent());
+		await publisher.PublishAsync(new TestCommand());
+	}
+}
+```
+For handling message, you must be implement ```IEventHandler<>``` or ```ICommandHandler<>``` and register it.
+``` cs
 public class TestEventHandler : IEventHandler<TestEvent>
 {
-    public Task HandleAsync(TestEvent @event)
-    {
-        return Task.CompletedTask;
-    }
+	public Task HandleAsync(TestEvent @event)
+	{
+		return Task.CompletedTask;
+	}
 }
-```
-When an event published, are received by all its handlers. You can publish an event by ***PublishAsync()*** of ***IMessageBus***:
-```cs
-public class Test
-{
-    private readonly IMessageBus _messageBus;
 
-    public Test(IMessageBus messageBus)
-    {
-        _messageBus = messageBus;
-    }
-
-    public async void Publish()
-    {
-        await _messageBus.PublishAsync(new TestEvent());
-    }
-}
-```
-Event handlers must be register in application startup:
-```cs
-services.AddEventHandler<TestEvent, TestEventHandler>();
-```
-
-## Commands
-All command classes must be inherit from ***Command***:
-```cs
-public class TestCommand: Command
-{
-    public string Name { get; set; }
-}
-```
-An event can have several handler. Event handler is a class that implement ***IEventHandler<>***:
-```cs
 public class TestCommandHandler : ICommandHandler<TestCommand>
 {
-    public Task HandleAsync(TestCommand command)
-    {
-        return Task.CompletedTask;
-    }
+	public Task HandleAsync(TestCommand command)
+	{
+		return Task.CompletedTask;
+	}
 }
 ```
-If two or more handler was registered for a command, it just handle by one of them, but other handlers will not be useless. Consider 4 command was sent and 2 handler registered in application, first command handled by handler1, second command handled by handler2, third command handled by handler1, and fourth command handled by handler2.
-**Note:** this scenario is true if command handlers are in different applications. If some handler are in single application, only the last of them always handling commands.
-You can send a command by ***SendAsync()*** of ***IMessageBus***:
-```cs
-public class Test
+``` cs
+public void ConfigureServices(IServiceCollection services)
 {
-    private readonly IMessageBus _messageBus;
-
-    public Test(IMessageBus messageBus)
-    {
-        _messageBus = messageBus;
-    }
-
-    public async void Send()
-    {
-        await _messageBus.SendAsync(new TestCommand());
-    }
+	services.AddEventHandler<TestEvent, TestEventHandler>();
+	services.AddCommandHandler<TestCommand, TestCommandHandler>();
 }
-```
-Command handlers must be register in application startup:
-```cs
-services.AddCommandHandler<TestCommand, TestCommandHandler>();
-```
-# Storing messages
-You can store all outbox and inbox messages to Elasticsearch or MongoDb.
-```cs
-services.AddMessageBus(new MessageBusSettings
-{
-    // Required settings, see at the beginning of the document
-    Application = "Test", // Current application name
-    Elasticsearch = new ElasticserachSettings
-    {
-        Node = "http://localhost:9200",
-        User = "user",
-        Password = "password",
-	Index = "messagebus" // Optional, default value is messagebus
-    }
-}).AddElasticsearch();
-
-// Or
-
-services.AddMessageBus(new MessageBusSettings
-{
-    // Required settings, see at the beginning of the document
-    Application = "Test", // Current application name
-    Mongo = new MongoSettings
-    {
-        ConnectionString = "mongodb://localhost:27017",
-        Database = "messagebus",
-	Collection = "messages" // Optional, default value is messages
-    }
-}).AddMongo();
-```
-You can read stored messages by ***GetAsync()*** of ***IMessageStorage***.
-```cs
-(awaitable) Task<IReadOnlyCollection<MessageData>> GetAsync([int from = 0], [int size = 50], [OperationType? type = null], [OperationStatus? status = null], [Type message = null])
 ```
