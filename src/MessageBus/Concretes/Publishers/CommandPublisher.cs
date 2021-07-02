@@ -9,10 +9,10 @@ namespace MessageBus.Concretes.Publishers
     public class CommandPublisher : IPublisher<ICommand>, IDisposable
     {
         private readonly IChannelPool channelPool;
-        private readonly ILogger<EventPublisher> logger;
+        private readonly ILogger<CommandPublisher> logger;
         private readonly IModel channel;
 
-        public CommandPublisher(IChannelPool channelPool, ILogger<EventPublisher> logger)
+        public CommandPublisher(IChannelPool channelPool, ILogger<CommandPublisher> logger)
         {
             this.channelPool = channelPool;
             this.logger = logger;
