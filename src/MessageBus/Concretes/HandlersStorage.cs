@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MessageBus.Concretes
 {
-    internal class HandlersStorage
+    public class HandlersStorage
     {
         public List<MessageCouple> EventCouples { get; } = new List<MessageCouple>();
 

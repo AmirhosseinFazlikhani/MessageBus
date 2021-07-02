@@ -1,49 +1,36 @@
 ﻿using MessageBus.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MessageBus.Concretes.Subscribers
 {
-    internal class EventSubscriber : BackgroundService
+    internal class EventSubscriber : Subscriber<IEvent>
     {
-        private readonly IChannelPool channelPool;
         private readonly ILogger<EventSubscriber> logger;
-        private readonly HandlersStorage handlersStorage;
-        private readonly MiddlewaresStorage middlewaresStorage;
-        private readonly IServiceProvider serviceProvider;
-
         public EventSubscriber(
             IChannelPool channelPool,
             ILogger<EventSubscriber> logger,
             HandlersStorage handlersStorage,
             MiddlewaresStorage middlewaresStorage,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider) : base(
+                channelPool,
+                handlersStorage,
+                middlewaresStorage,
+                serviceProvider)
         {
-            this.channelPool = channelPool;
             this.logger = logger;
-            this.handlersStorage = handlersStorage;
-            this.middlewaresStorage = middlewaresStorage;
-            this.serviceProvider = serviceProvider;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override void Subscribe(Type messageType, IModel channel)
         {
-            foreach (var item in GetMessageTypes())
+            try
             {
-                var exchange = item.GetEventExchange();
-                var channel = channelPool.Get();
-
+                var exchange = messageType.GetEventExchange();
                 channel.ExchangeDeclare(
-                        exchange: exchange,
-                        type: ExchangeType.Fanout);
+                            exchange: exchange,
+                            type: ExchangeType.Fanout);
 
                 var queue = channel.QueueDeclare().QueueName;
 
@@ -54,7 +41,7 @@ namespace MessageBus.Concretes.Subscribers
 
                 logger.LogInformation(
                     "Start subscribing {EventName}. Queue: {Queue} & Exchange: {Exchange}",
-                    item.Name,
+                    messageType.Name,
                     exchange,
                     queue);
 
@@ -62,7 +49,7 @@ namespace MessageBus.Concretes.Subscribers
 
                 consumer.Received += (model, ea) =>
                 {
-                    var message = (IMessage)ea.Body.Deserialize(item);
+                    var message = (IMessage)ea.Body.Deserialize(messageType);
 
                     logger.LogTrace(
                         "Message {HashCode} was received. Queue: {Queue} & Exchange: {Exchange}",
@@ -82,25 +69,13 @@ namespace MessageBus.Concretes.Subscribers
                     autoAck: false,
                     consumer: consumer);
             }
-
-            return Task.CompletedTask;
-        }
-
-        private IEnumerable<Type> GetMessageTypes()
-            => handlersStorage.EventCouples
-                .ToList()
-                .Select(x => x.Message)
-                .Distinct();
-
-        private async void HandleMessage(IMessage message)
-        {
-            var middlewareContext = ActivatorUtilities.CreateInstance<MiddlewareContext>(
-                    serviceProvider,
-                    new object[] {
-                        middlewaresStorage.SubscriberMiddlewares
-                    });
-
-            await middlewareContext.Next(message);
+            catch (Exception exp)
+            {
+                logger.LogError(
+                    exp,
+                    "An exception was thrown when trying to start subscribing event {Event}",
+                    messageType.Name);
+            }
         }
     }
 }

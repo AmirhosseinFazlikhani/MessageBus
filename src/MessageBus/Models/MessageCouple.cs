@@ -2,7 +2,7 @@
 
 namespace MessageBus.Models
 {
-    internal class MessageCouple
+    public class MessageCouple
     {
         public Type Message { get; set; }
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MessageBus.Concretes.Middlewars
 {
-    internal class SubscriberRouterMiddleware : IMiddleware
+    public class SubscriberRouterMiddleware : IMiddleware
     {
         private readonly HandlersStorage storage;
         private readonly IServiceProvider provider;

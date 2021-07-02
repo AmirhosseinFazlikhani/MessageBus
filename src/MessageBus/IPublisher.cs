@@ -4,6 +4,6 @@ namespace MessageBus
 {
     public interface IPublisher<T>
     {
-        Task ProcessAsync(T message);
+        Task PublishAsync(T message);
     }
 }

@@ -17,10 +17,10 @@ namespace MessageBus.UnitTests
             var channelPool = new Mock<IChannelPool>();
             var commandEndpoint = new Mock<CommandPublisher>(channelPool.Object);
             var eventEndpoint = new Mock<EventPublisher>(channelPool.Object);
-            commandEndpoint.Setup(x => x.ProcessAsync(It.IsAny<IMessage>())).Returns(() => Task.FromResult(endpointType = typeof(CommandPublisher)));
-            eventEndpoint.Setup(x => x.ProcessAsync(It.IsAny<IMessage>())).Returns(() => Task.FromResult(endpointType = typeof(EventPublisher)));
+            commandEndpoint.Setup(x => x.PublishAsync(It.IsAny<IMessage>())).Returns(() => Task.FromResult(endpointType = typeof(CommandPublisher)));
+            eventEndpoint.Setup(x => x.PublishAsync(It.IsAny<IMessage>())).Returns(() => Task.FromResult(endpointType = typeof(EventPublisher)));
 
-            var middleware = new PublisherRouterMiddleware(commandEndpoint.Object, eventEndpoint.Object);
+            var middleware = new PublisherRouterMiddleware();
             await middleware.InvokeAsync(new TestEvent(), middlewareContext.Object);
 
             Assert.Equal(typeof(EventPublisher), endpointType);

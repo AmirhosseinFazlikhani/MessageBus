@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MessageBus.Concretes.Publishers
 {
-    internal class EventPublisher : IPublisher<IEvent>, IDisposable
+    public class EventPublisher : IPublisher<IEvent>, IDisposable
     {
         private readonly IChannelPool channelPool;
         private readonly ILogger<EventPublisher> logger;
@@ -19,7 +19,7 @@ namespace MessageBus.Concretes.Publishers
             channel = channelPool.Get();
         }
 
-        public virtual Task ProcessAsync(IEvent message)
+        public virtual Task PublishAsync(IEvent message)
         {
             var exchange = message.GetType().GetEventExchange();
             var body = message.Serialize();

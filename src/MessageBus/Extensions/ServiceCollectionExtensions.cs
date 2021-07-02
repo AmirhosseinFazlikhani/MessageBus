@@ -1,5 +1,4 @@
 ﻿using MessageBus.Concretes;
-using MessageBus.Concretes.Subscribers;
 using MessageBus.Models;
 using MessageBus.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,11 +22,12 @@ namespace MessageBus.Extensions
             services.AddSingleton(handlersStorage);
 
             foreach (var item in builderInstance.PublisherBuilder.Publishers)
-                services.AddScoped(item.Key, item.Value);
+                services.AddTransient(item.Key, item.Value);
 
-            services.AddHostedService<EventSubscriber>();
-            services.AddHostedService<CommandSubscriber>();
+            foreach (var item in builderInstance.SubscriberBuilder.Subscribers)
+                services.AddTransient(item.Key, item.Value);
 
+            services.AddHostedService<SubscribersActivator>();
             services.AddSingleton<IChannelPool, ChannelPool>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
 

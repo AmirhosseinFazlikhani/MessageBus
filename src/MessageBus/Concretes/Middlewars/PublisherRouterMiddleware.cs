@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MessageBus.Concretes.Middlewars
 {
-    internal class PublisherRouterMiddleware : IMiddleware
+    public class PublisherRouterMiddleware : IMiddleware
     {
         private readonly IServiceProvider serviceProvider;
 
@@ -28,7 +28,7 @@ namespace MessageBus.Concretes.Middlewars
             if (publisher is null)
                 throw new NotImplementedException("Publisher for this message type was not implemented.");
 
-            await publisher.ProcessAsync((dynamic)message);
+            await publisher.PublishAsync((dynamic)message);
         }
     }
 }

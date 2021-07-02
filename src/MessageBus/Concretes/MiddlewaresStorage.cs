@@ -2,7 +2,7 @@
 
 namespace MessageBus.Concretes
 {
-    internal class MiddlewaresStorage
+    public class MiddlewaresStorage
     {
         public Type[] PublisherMiddlewares { get; }
 
