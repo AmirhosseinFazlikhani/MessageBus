@@ -164,7 +164,7 @@ public class Test{
 	    this.publisher = publisher;
 	}
 	
-	publiic async Task TestPublish()
+	public async Task TestPublish()
 	{
 		await publisher.PublishAsync(new TestEvent());
 		await publisher.PublishAsync(new TestCommand());
