@@ -29,8 +29,8 @@ namespace MessageBus.Concretes.Subscribers
             {
                 var exchange = messageType.GetEventExchange();
                 channel.ExchangeDeclare(
-                            exchange: exchange,
-                            type: ExchangeType.Fanout);
+                    exchange: exchange,
+                    type: ExchangeType.Fanout);
 
                 var queue = channel.QueueDeclare().QueueName;
 
