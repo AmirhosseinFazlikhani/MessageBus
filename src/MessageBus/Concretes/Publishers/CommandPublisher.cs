@@ -6,23 +6,22 @@ using System.Threading.Tasks;
 
 namespace MessageBus.Concretes.Publishers
 {
-    public class CommandPublisher : IPublisher<ICommand>, IDisposable
+    public class CommandPublisher : IPublisher<ICommand>
     {
         private readonly IChannelPool channelPool;
         private readonly ILogger<CommandPublisher> logger;
-        private readonly IModel channel;
 
         public CommandPublisher(IChannelPool channelPool, ILogger<CommandPublisher> logger)
         {
             this.channelPool = channelPool;
             this.logger = logger;
-            channel = channelPool.Get();
         }
 
         public virtual Task PublishAsync(ICommand message)
         {
             var queue = message.GetType().GetCommandQueue();
             var body = message.Serialize();
+            var channel = channelPool.Get();
 
             channel.QueueDeclare(
                 queue: queue,
@@ -40,12 +39,9 @@ namespace MessageBus.Concretes.Publishers
                 message.GetHashCode(),
                 queue);
 
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
             channelPool.Release(channel);
+
+            return Task.CompletedTask;
         }
     }
 }
