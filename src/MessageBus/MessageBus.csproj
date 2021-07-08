@@ -5,7 +5,7 @@
 		<Authors>Amirhossein Fazlikhani</Authors>
 		<RepositoryUrl>https://github.com/AmirhosseinFazlikhani/MessageBus</RepositoryUrl>
 		<PackageId>Berg.MessageBus.RabbitMq</PackageId>
-		<Version>7.0.0</Version>
+		<Version>7.0.1</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

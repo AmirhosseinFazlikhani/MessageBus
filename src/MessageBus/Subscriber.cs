@@ -4,7 +4,6 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MessageBus
@@ -19,18 +18,18 @@ namespace MessageBus
         private readonly IChannelPool channelPool;
         private readonly HandlersStorage handlersStorage;
         private readonly MiddlewaresStorage middlewaresStorage;
-        private readonly IServiceProvider serviceProvider;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         protected Subscriber(
             IChannelPool channelPool,
             HandlersStorage handlersStorage,
             MiddlewaresStorage middlewaresStorage,
-            IServiceProvider serviceProvider)
+            IServiceScopeFactory serviceScopeFactory)
         {
             this.channelPool = channelPool;
             this.handlersStorage = handlersStorage;
             this.middlewaresStorage = middlewaresStorage;
-            this.serviceProvider = serviceProvider;
+            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         protected abstract void Subscribe(Type messageType, IModel channel);
@@ -52,13 +51,16 @@ namespace MessageBus
 
         protected async void HandleMessage(IMessage message)
         {
-            var middlewareContext = ActivatorUtilities.CreateInstance<MiddlewareContext>(
-                    serviceProvider,
-                    new object[] {
+            using (var scope = serviceScopeFactory.CreateScope())
+            {
+                var middlewareContext = ActivatorUtilities.CreateInstance<MiddlewareContext>(
+                        scope.ServiceProvider,
+                        new object[] {
                         middlewaresStorage.SubscriberMiddlewares
-                    });
+                        });
 
-            await middlewareContext.Next(message);
+                await middlewareContext.Next(message);
+            }
         }
     }
 }
