@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,21 +9,24 @@ namespace MessageBus.Concretes
 {
     public class SubscribersActivator : BackgroundService
     {
-        private readonly Subscriber<IEvent> eventSubscriber;
-        private readonly Subscriber<ICommand> commandSubscriber;
+        private readonly IReadOnlyDictionary<Type, Type> subsribers;
+        private readonly IServiceProvider serviceProvider;
 
         public SubscribersActivator(
-            Subscriber<IEvent> eventSubscriber,
-            Subscriber<ICommand> commandSubscriber)
+            IReadOnlyDictionary<Type, Type> subsribers,
+            IServiceProvider serviceProvider)
         {
-            this.eventSubscriber = eventSubscriber;
-            this.commandSubscriber = commandSubscriber;
+            this.subsribers = subsribers;
+            this.serviceProvider = serviceProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await eventSubscriber.Execute();
-            await commandSubscriber.Execute();
+            foreach (var item in subsribers)
+            {
+                var instance = (dynamic)ActivatorUtilities.CreateInstance(serviceProvider, item.Value);
+                await instance.Execute();
+            }
         }
     }
 }

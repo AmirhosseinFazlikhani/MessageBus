@@ -42,12 +42,10 @@ namespace MessageBus
             return Task.CompletedTask;
         }
 
-        private IEnumerable<Type> GetMessageTypes()
-           => handlersStorage.EventCouples
-               .ToList()
-               .Select(x => x.Message)
-               .Distinct()
-               .Where(x => x.GetInterfaces().Any(y => y == typeof(T)));
+        private IEnumerable<Type> GetMessageTypes() => handlersStorage.Pairs
+            .Select(x => x.Key)
+            .Distinct()
+            .Where(x => x.GetInterfaces().Any(y => y == typeof(T)));
 
         protected async void HandleMessage(IMessage message)
         {

@@ -1,5 +1,4 @@
 ﻿using MessageBus.Concretes;
-using MessageBus.Models;
 using MessageBus.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -27,7 +26,11 @@ namespace MessageBus.Extensions
             foreach (var item in builderInstance.SubscriberBuilder.Subscribers)
                 services.AddTransient(item.Key, item.Value);
 
-            services.AddHostedService<SubscribersActivator>();
+            services.AddHostedService(p =>
+            {
+                return new SubscribersActivator(builderInstance.SubscriberBuilder.Subscribers, p);
+            });
+
             services.AddSingleton<IChannelPool, ChannelPool>();
             services.AddScoped<IMessagePublisher, MessagePublisher>();
 
@@ -50,29 +53,11 @@ namespace MessageBus.Extensions
             return factory.CreateConnection();
         }
 
-        public static IServiceCollection AddEventHandler<TEvent, THandler>(this IServiceCollection services)
-            where TEvent : IEvent
-            where THandler : IEventHandler<TEvent>
+        public static IServiceCollection AddMessageHandler<TMessage, THandler>(this IServiceCollection services)
+            where TMessage : IMessage
+            where THandler : IMessageHandler<TMessage>
         {
-            handlersStorage.EventCouples.Add(new MessageCouple
-            {
-                Message = typeof(TEvent),
-                Handler = typeof(THandler)
-            });
-
-            return services;
-        }
-
-        public static IServiceCollection AddCommandHandler<TCommand, THandler>(this IServiceCollection services)
-            where TCommand : ICommand
-            where THandler : ICommandHandler<TCommand>
-        {
-            handlersStorage.CommandCouples.Add(new MessageCouple
-            {
-                Message = typeof(TCommand),
-                Handler = typeof(THandler)
-            });
-
+            handlersStorage.Pairs.Add(typeof(TMessage), typeof(THandler));
             return services;
         }
     }

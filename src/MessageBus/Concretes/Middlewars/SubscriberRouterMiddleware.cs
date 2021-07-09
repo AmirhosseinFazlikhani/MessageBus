@@ -1,5 +1,4 @@
-﻿using MessageBus.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -26,9 +25,7 @@ namespace MessageBus.Concretes.Middlewars
 
         public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
         {
-            var handlers = message is IEvent
-                ? SelectHandlers(storage.EventCouples, message)
-                : SelectHandlers(storage.CommandCouples, message);
+            var handlers = SelectHandlers(message);
 
             foreach (var item in handlers)
             {
@@ -42,7 +39,7 @@ namespace MessageBus.Concretes.Middlewars
             }
         }
 
-        private IEnumerable<Type> SelectHandlers(IEnumerable<MessageCouple> handlers, IMessage message)
-            => handlers.Where(x => x.Message == message.GetType()).Select(x => x.Handler);
+        private IEnumerable<Type> SelectHandlers(IMessage message)
+            => storage.Pairs.Where(x => x.Key == message.GetType()).Select(x => x.Value);
     }
 }
