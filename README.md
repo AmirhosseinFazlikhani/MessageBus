@@ -131,11 +131,11 @@ public class EventSubscriber : Subscriber<IEvent>
 		IChannelPool channelPool,
 		HandlersStorage handlersStorage,
 		MiddlewaresStorage middlewaresStorage,
-		IServiceProvider serviceProvider) : base(
+		IServiceScopeFactory serviceScopeFactory) : base(
 			channelPool,
 			handlersStorage,
 			middlewaresStorage,
-			serviceProvider) { }
+			serviceScopeFactory) { }
 
         protected override void Subscribe(Type messageType, IModel channel)
         {
@@ -171,19 +171,19 @@ public class Test{
 	}
 }
 ```
-For handling message, you must be implement ```IEventHandler<>``` or ```ICommandHandler<>``` and register it.
+For handling message, you must be implement ```IMessageHandler<>``` and register it.
 ``` cs
-public class TestEventHandler : IEventHandler<TestEvent>
+public class TestEventHandler : IMessageHandler<TestEvent>
 {
-	public Task HandleAsync(TestEvent @event)
+	public Task HandleAsync(TestEvent message)
 	{
 		return Task.CompletedTask;
 	}
 }
 
-public class TestCommandHandler : ICommandHandler<TestCommand>
+public class TestCommandHandler : IMessageHandler<TestCommand>
 {
-	public Task HandleAsync(TestCommand command)
+	public Task HandleAsync(TestCommand message)
 	{
 		return Task.CompletedTask;
 	}
@@ -192,7 +192,7 @@ public class TestCommandHandler : ICommandHandler<TestCommand>
 ``` cs
 public void ConfigureServices(IServiceCollection services)
 {
-	services.AddEventHandler<TestEvent, TestEventHandler>();
-	services.AddCommandHandler<TestCommand, TestCommandHandler>();
+	services.AddMessageHandler<TestEvent, TestEventHandler>();
+	services.AddMessageHandler<TestCommand, TestCommandHandler>();
 }
 ```
