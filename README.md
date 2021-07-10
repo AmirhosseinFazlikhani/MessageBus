@@ -41,7 +41,7 @@ MessageBus read settings from ```appsettings.json```. You must be pass ```IConfi
 }
 ```
 If the connection is lost for any reason, application can try to recover it if *AutomaticRecovery* option is enabled.
-MessageBus has a abstraction for publishing and subscribing message. You can implement these or use default implementation. In This instance of configuration, subscriber and publisher uses default implementaion for events and commands.
+MessageBus has an abstraction for publishing and subscribing message. You can implement these or use default implementation. In This instance of configuration, subscriber and publisher uses default implementaion for events and commands.
 MessageBus supports middlewares. When a message is published, publishing middlewares are executed in order. ```RouterMiddleware``` must be executed last of all because it route message to its publisher, but don't call the next middleware. And in subscribing pipeline, ```RouterMiddleware``` route the received message to its handlers.
 
 ## Middlewares
