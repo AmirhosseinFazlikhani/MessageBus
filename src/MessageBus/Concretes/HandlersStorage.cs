@@ -5,6 +5,13 @@ namespace MessageBus.Concretes
 {
     public class HandlersStorage
     {
-        public IDictionary<Type, Type> Pairs { get; } = new Dictionary<Type, Type>();
+        public IList<Pair> Pairs { get; } = new List<Pair>();
+    }
+
+    public class Pair
+    {
+        public Type Message { get; set; }
+
+        public Type Handler { get; set; }
     }
 }

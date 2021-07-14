@@ -43,7 +43,7 @@ namespace MessageBus
         }
 
         private IEnumerable<Type> GetMessageTypes() => handlersStorage.Pairs
-            .Select(x => x.Key)
+            .Select(x => x.Message)
             .Distinct()
             .Where(x => x.GetInterfaces().Any(y => y == typeof(T)));
 
@@ -52,10 +52,10 @@ namespace MessageBus
             using (var scope = serviceScopeFactory.CreateScope())
             {
                 var middlewareContext = ActivatorUtilities.CreateInstance<MiddlewareContext>(
-                        scope.ServiceProvider,
-                        new object[] {
-                        middlewaresStorage.SubscriberMiddlewares
-                        });
+                    scope.ServiceProvider,
+                    new object[] {
+                    middlewaresStorage.SubscriberMiddlewares
+                    });
 
                 await middlewareContext.Next(message);
             }

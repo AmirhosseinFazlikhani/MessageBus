@@ -40,6 +40,6 @@ namespace MessageBus.Concretes.Middlewars
         }
 
         private IEnumerable<Type> SelectHandlers(IMessage message)
-            => storage.Pairs.Where(x => x.Key == message.GetType()).Select(x => x.Value);
+            => storage.Pairs.Where(x => x.Message == message.GetType()).Select(x => x.Handler);
     }
 }

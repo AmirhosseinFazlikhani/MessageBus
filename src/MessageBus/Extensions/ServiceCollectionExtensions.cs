@@ -57,7 +57,12 @@ namespace MessageBus.Extensions
             where TMessage : IMessage
             where THandler : IMessageHandler<TMessage>
         {
-            handlersStorage.Pairs.Add(typeof(TMessage), typeof(THandler));
+            handlersStorage.Pairs.Add(new Pair
+            {
+                Message = typeof(TMessage),
+                Handler = typeof(THandler)
+            });
+
             return services;
         }
     }
