@@ -56,10 +56,10 @@ public class LoggerMiddleware : IMiddleware
 		this.logger = logger;
 	}
 
-	public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
+	public async Task InvokeAsync(IMessage message, RequestDelegate next)
 	{
 		logger.LogInformation(message.GetHashCode().ToString());
-		await context.Next(message);
+		await next.Invoke(message);
 	}
 }
 ```
@@ -127,19 +127,12 @@ Each type of message has its own subscriber. Subscibers must be implement ```Sub
 ``` cs
 public class EventSubscriber : Subscriber<IEvent>
 {
-	public EventSubscriber(
-		IChannelPool channelPool,
-		HandlersStorage handlersStorage,
-		MiddlewaresStorage middlewaresStorage,
-		IServiceScopeFactory serviceScopeFactory) : base(
-			channelPool,
-			handlersStorage,
-			middlewaresStorage,
-			serviceScopeFactory) { }
+	public EventSubscriber(IServiceProvider serviceProvider) : base(serviceProvider)
+	{
+	}
 
         protected override void Subscribe(Type messageType, IModel channel)
-        {
-		
+        {	
 	}
 }
 ```
