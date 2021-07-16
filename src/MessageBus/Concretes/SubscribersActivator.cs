@@ -9,11 +9,11 @@ namespace MessageBus.Concretes
 {
     public class SubscribersActivator : BackgroundService
     {
-        private readonly IReadOnlyDictionary<Type, Type> subsribers;
+        private readonly IEnumerator<Type> subsribers;
         private readonly IServiceProvider serviceProvider;
 
         public SubscribersActivator(
-            IReadOnlyDictionary<Type, Type> subsribers,
+            IEnumerator<Type> subsribers,
             IServiceProvider serviceProvider)
         {
             this.subsribers = subsribers;
@@ -22,9 +22,9 @@ namespace MessageBus.Concretes
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            foreach (var item in subsribers)
+            while (subsribers.MoveNext())
             {
-                var instance = (dynamic)ActivatorUtilities.CreateInstance(serviceProvider, item.Value);
+                var instance = (dynamic)serviceProvider.GetRequiredService(subsribers.Current);
                 await instance.Execute();
             }
         }

@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using MessageBus.Concretes;
+using System.Threading.Tasks;
 
 namespace MessageBus
 {
     public interface IMiddleware
     {
-        Task InvokeAsync(IMessage message, IMiddlewareContext context);
+        Task InvokeAsync(IMessage message, RequestDelegate next);
     }
 }

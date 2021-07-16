@@ -23,7 +23,7 @@ namespace MessageBus.Concretes.Middlewars
             this.logger = logger;
         }
 
-        public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
+        public async Task InvokeAsync(IMessage message, RequestDelegate next)
         {
             var handlers = SelectHandlers(message);
 

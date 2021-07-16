@@ -1,5 +1,4 @@
 ﻿using MessageBus.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,15 +11,8 @@ namespace MessageBus.Concretes.Subscribers
         private readonly ILogger<EventSubscriber> logger;
 
         public CommandSubscriber(
-            IChannelPool channelPool,
-            ILogger<EventSubscriber> logger,
-            HandlersStorage handlersStorage,
-            MiddlewaresStorage middlewaresStorage,
-            IServiceScopeFactory serviceScopeFactory) : base(
-                channelPool,
-                handlersStorage,
-                middlewaresStorage,
-                serviceScopeFactory)
+            IServiceProvider serviceProvider,
+            ILogger<EventSubscriber> logger) : base(serviceProvider)
         {
             this.logger = logger;
         }

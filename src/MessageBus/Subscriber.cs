@@ -15,49 +15,42 @@ namespace MessageBus
     public abstract class Subscriber<T>
         where T : IMessage
     {
-        private readonly IChannelPool channelPool;
-        private readonly HandlersStorage handlersStorage;
-        private readonly MiddlewaresStorage middlewaresStorage;
-        private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly IServiceProvider serviceProvider;
 
-        protected Subscriber(
-            IChannelPool channelPool,
-            HandlersStorage handlersStorage,
-            MiddlewaresStorage middlewaresStorage,
-            IServiceScopeFactory serviceScopeFactory)
+        protected Subscriber(IServiceProvider serviceProvider)
         {
-            this.channelPool = channelPool;
-            this.handlersStorage = handlersStorage;
-            this.middlewaresStorage = middlewaresStorage;
-            this.serviceScopeFactory = serviceScopeFactory;
+            this.serviceProvider = serviceProvider;
         }
 
         protected abstract void Subscribe(Type messageType, IModel channel);
 
         public Task Execute()
         {
+            var channelPool = serviceProvider.GetRequiredService<IChannelPool>();
+
             foreach (var item in GetMessageTypes())
                 Subscribe(item, channelPool.Get());
 
             return Task.CompletedTask;
         }
 
-        private IEnumerable<Type> GetMessageTypes() => handlersStorage.Pairs
-            .Select(x => x.Message)
-            .Distinct()
-            .Where(x => x.GetInterfaces().Any(y => y == typeof(T)));
+        private IEnumerable<Type> GetMessageTypes()
+        {
+            var storage = serviceProvider.GetRequiredService<HandlersStorage>();
+            return storage.Pairs
+                .Select(x => x.Message)
+                .Distinct()
+                .Where(x => x.GetInterfaces().Any(y => y == typeof(T)));
+        }
 
         protected async void HandleMessage(IMessage message)
         {
-            using (var scope = serviceScopeFactory.CreateScope())
+            var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+            using (var scope = scopeFactory.CreateScope())
             {
-                var middlewareContext = ActivatorUtilities.CreateInstance<MiddlewareContext>(
-                    scope.ServiceProvider,
-                    new object[] {
-                    middlewaresStorage.SubscriberMiddlewares
-                    });
-
-                await middlewareContext.Next(message);
+                var pipelineFactory = scope.ServiceProvider.GetRequiredService<IPipelineFactory>();
+                var pipeline = pipelineFactory.CreateSubscriberPipeline();
+                await pipeline.Start(message);
             }
         }
     }

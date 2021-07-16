@@ -7,7 +7,7 @@ namespace MessageBus.Concretes
     public class SubscriberBuilder : ISubscriberBuilder
     {
         private readonly List<Type> middlewares = new List<Type>();
-        public Type[] Middlewares => middlewares.ToArray();
+        public IEnumerable<Type> Middlewares => middlewares;
 
         private readonly IDictionary<Type, Type> subscribers = new Dictionary<Type, Type>();
         public IReadOnlyDictionary<Type, Type> Subscribers => subscribers.ToDictionary(k => k.Key, v => v.Value);

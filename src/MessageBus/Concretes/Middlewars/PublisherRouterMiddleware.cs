@@ -13,7 +13,7 @@ namespace MessageBus.Concretes.Middlewars
             this.serviceProvider = serviceProvider;
         }
 
-        public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
+        public async Task InvokeAsync(IMessage message, RequestDelegate next)
         {
             var @interface = message.GetType()
                 .GetInterfaces()

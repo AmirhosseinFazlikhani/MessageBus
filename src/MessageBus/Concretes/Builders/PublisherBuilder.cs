@@ -7,7 +7,7 @@ namespace MessageBus.Concretes
     public class PublisherBuilder : IPublisherBuilder
     {
         private readonly IList<Type> middlewares = new List<Type>();
-        public Type[] Middlewares => middlewares.ToArray();
+        public IEnumerable<Type> Middlewares => middlewares;
 
         private readonly IDictionary<Type, Type> publishers = new Dictionary<Type, Type>();
         public IReadOnlyDictionary<Type, Type> Publishers => publishers.ToDictionary(k => k.Key, v => v.Value);

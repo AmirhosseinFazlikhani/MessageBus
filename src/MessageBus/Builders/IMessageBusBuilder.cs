@@ -1,5 +1,4 @@
-﻿using MessageBus.Concretes;
-using MessageBus.Settings;
+﻿using MessageBus.Settings;
 using Microsoft.Extensions.Configuration;
 using System;
 
@@ -9,9 +8,9 @@ namespace MessageBus
     {
         MessageBusSettings Settings { get; }
 
-        PublisherBuilder PublisherBuilder { get; }
+        IPublisherBuilder PublisherBuilder { get; }
 
-        SubscriberBuilder SubscriberBuilder { get; }
+        ISubscriberBuilder SubscriberBuilder { get; }
 
         IMessageBusBuilder ConfigurePublisher(Action<IPublisherBuilder> action);
 

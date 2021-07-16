@@ -8,9 +8,9 @@ namespace MessageBus.Concretes
     {
         public MessageBusSettings Settings { get; private set; }
 
-        public PublisherBuilder PublisherBuilder { get; } = new PublisherBuilder();
+        public IPublisherBuilder PublisherBuilder { get; } = new PublisherBuilder();
 
-        public SubscriberBuilder SubscriberBuilder { get; } = new SubscriberBuilder();
+        public ISubscriberBuilder SubscriberBuilder { get; } = new SubscriberBuilder();
 
         public IMessageBusBuilder ReadSettings(IConfiguration configuration)
         {

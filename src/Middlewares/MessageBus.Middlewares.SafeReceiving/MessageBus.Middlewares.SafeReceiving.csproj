@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\MessageBus\MessageBus.csproj" />
+	  <ProjectReference Include="..\..\MessageBus\MessageBus.csproj" />
 	</ItemGroup>
 
 </Project>

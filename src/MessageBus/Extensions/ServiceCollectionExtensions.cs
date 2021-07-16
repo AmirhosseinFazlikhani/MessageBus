@@ -3,6 +3,7 @@ using MessageBus.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using System;
+using System.Linq;
 
 namespace MessageBus.Extensions
 {
@@ -17,22 +18,27 @@ namespace MessageBus.Extensions
 
             var connection = CreateConnection(builderInstance.Settings);
             services.AddSingleton(connection);
-            services.AddSingleton(new MiddlewaresStorage(builderInstance.PublisherBuilder.Middlewares, builderInstance.SubscriberBuilder.Middlewares));
+
+            services.AddSingleton(new PublisherMiddlewareStorage { Middlewares = builderInstance.PublisherBuilder.Middlewares });
+            services.AddSingleton(new SubscriberMiddlewareStorage { Middlewares = builderInstance.SubscriberBuilder.Middlewares });
+
             services.AddSingleton(handlersStorage);
 
-            foreach (var item in builderInstance.PublisherBuilder.Publishers)
+            foreach (var item in builderInstance.PublisherBuilder.Publishers.Concat(builderInstance.SubscriberBuilder.Subscribers))
                 services.AddTransient(item.Key, item.Value);
 
-            foreach (var item in builderInstance.SubscriberBuilder.Subscribers)
-                services.AddTransient(item.Key, item.Value);
+            foreach (var item in builderInstance.PublisherBuilder.Middlewares.Concat(builderInstance.SubscriberBuilder.Middlewares).Distinct())
+                services.AddTransient(item);
 
             services.AddHostedService(p =>
             {
-                return new SubscribersActivator(builderInstance.SubscriberBuilder.Subscribers, p);
+                return new SubscribersActivator(builderInstance.SubscriberBuilder.Subscribers.Select(x=>x.Key).GetEnumerator(), p);
             });
 
             services.AddSingleton<IChannelPool, ChannelPool>();
-            services.AddScoped<IMessagePublisher, MessagePublisher>();
+            services.AddTransient<IMessagePublisher, MessagePublisher>();
+            services.AddTransient<IMiddlewareFactory, MiddlewareFactory>();
+            services.AddTransient<IPipelineFactory, PipelineFactory>();
 
             return services;
         }

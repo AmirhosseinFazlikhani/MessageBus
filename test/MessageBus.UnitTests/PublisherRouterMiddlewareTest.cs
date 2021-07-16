@@ -13,7 +13,7 @@ namespace MessageBus.UnitTests
         private readonly Mock<CommandPublisher> commandPublisher;
         private readonly Mock<EventPublisher> eventPublisher;
         private readonly Mock<IServiceProvider> serviceProvider;
-        private readonly Mock<IMiddlewareContext> middlewareContext;
+        private readonly Mock<IPipeline> middlewareContext;
 
         public PublisherRouterMiddlewareTest()
         {
@@ -23,7 +23,7 @@ namespace MessageBus.UnitTests
 
             commandPublisher = new Mock<CommandPublisher>(channelPool.Object, commandLogger.Object);
             eventPublisher = new Mock<EventPublisher>(channelPool.Object, eventLogger.Object);
-            middlewareContext = new Mock<IMiddlewareContext>();
+            middlewareContext = new Mock<IPipeline>();
             serviceProvider = new Mock<IServiceProvider>();
 
             serviceProvider.Setup(x => x.GetService(typeof(IPublisher<IEvent>)))
@@ -45,7 +45,7 @@ namespace MessageBus.UnitTests
                 .Returns(() => Task.FromResult(endpointType = typeof(EventPublisher)));
 
             var middleware = new PublisherRouterMiddleware(serviceProvider.Object);
-            await middleware.InvokeAsync(new TestEvent(), middlewareContext.Object);
+            await middleware.InvokeAsync(new TestEvent(), (message) => Task.CompletedTask);
 
             Assert.Equal(typeof(EventPublisher), endpointType);
         }

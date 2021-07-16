@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MessageBus
 {
     public interface ISubscriberBuilder
     {
-        Type[] Middlewares { get; }
+        IEnumerable<Type> Middlewares { get; }
+
+        IReadOnlyDictionary<Type, Type> Subscribers { get; }
 
         ISubscriberBuilder UseMiddleware<T>() where T : IMiddleware;
 

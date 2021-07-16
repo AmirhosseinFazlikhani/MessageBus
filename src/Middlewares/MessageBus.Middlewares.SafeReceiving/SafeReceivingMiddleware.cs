@@ -4,10 +4,10 @@ namespace MessageBus.Middlewares.SafeReceiving
 {
     public class SafeReceivingMiddleware : IMiddleware
     {
-        public async Task InvokeAsync(IMessage message, IMiddlewareContext context)
+        public async Task InvokeAsync(IMessage message, RequestDelegate next)
         {
             if (MessagesStorage.TryAdd(message))
-                await context.Next(message);
+                await next.Invoke(message);
         }
     }
 }
