@@ -7,7 +7,7 @@ Install-Package Berg.MessageBus.RabbitMq -Version <version>
 ```
 # Usage
 At first, you must register message bus in the DI container and enter the RabbitMq server details:
-```cs
+``` cs
 services.AddMessageBus(messagebus =>
 {
 	messagebus.ReadSettings(Configuration);
