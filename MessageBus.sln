@@ -11,10 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4E279CCE-3
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBus.UnitTests", "test\MessageBus.UnitTests\MessageBus.UnitTests.csproj", "{56A116FA-EC12-4A4A-BCC1-8774580CFFF8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Middlewares", "Middlewares", "{6933A4AE-37C9-4606-B11B-354567AEE404}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageBus.Middlewares.SafeReceiving", "src\Middlewares\MessageBus.Middlewares.SafeReceiving\MessageBus.Middlewares.SafeReceiving.csproj", "{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +25,6 @@ Global
 		{56A116FA-EC12-4A4A-BCC1-8774580CFFF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56A116FA-EC12-4A4A-BCC1-8774580CFFF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56A116FA-EC12-4A4A-BCC1-8774580CFFF8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -40,8 +32,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D9534A63-7CF7-4404-ADA2-2091E138D5A6} = {DC14F036-6AE1-4304-BF93-09DA293E06D0}
 		{56A116FA-EC12-4A4A-BCC1-8774580CFFF8} = {4E279CCE-3300-4B16-B05F-FD7E8364BF6E}
-		{6933A4AE-37C9-4606-B11B-354567AEE404} = {DC14F036-6AE1-4304-BF93-09DA293E06D0}
-		{D6E0FDB5-601E-4177-ACCC-FFE53C8C721E} = {6933A4AE-37C9-4606-B11B-354567AEE404}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {098091F1-2EB9-47F2-99C6-776980601AA0}

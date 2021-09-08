@@ -36,8 +36,8 @@ namespace MessageBus.Concretes.Subscribers
                 logger.LogInformation(
                     "Start subscribing {EventName}. Queue: {Queue} & Exchange: {Exchange}",
                     messageType.Name,
-                    exchange,
-                    queue);
+                    queue,
+                    exchange);
 
                 var consumer = new EventingBasicConsumer(channel);
 

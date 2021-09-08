@@ -29,9 +29,8 @@ namespace MessageBus.Concretes.Subscribers
                     autoDelete: false);
 
                 logger.LogInformation(
-                    "Start subscribing {EventName}. Queue: {Queue} & Exchange: {Exchange}",
+                    "Start subscribing {CommandName}. Queue: {Queue}",
                     messageType.Name,
-                    string.Empty,
                     queue);
 
                 var consumer = new EventingBasicConsumer(channel);
@@ -40,10 +39,9 @@ namespace MessageBus.Concretes.Subscribers
                     var message = (IMessage)ea.Body.Deserialize(messageType);
 
                     logger.LogTrace(
-                        "Message {HashCode} was received. Queue: {Queue} & Exchange: {Exchange}",
+                        "Message {HashCode} was received. Queue: {Queue}",
                         message.GetHashCode(),
-                        queue,
-                        string.Empty);
+                        queue);
 
                     HandleMessage(message);
 

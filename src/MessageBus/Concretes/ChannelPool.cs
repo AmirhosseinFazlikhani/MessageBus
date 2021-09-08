@@ -25,16 +25,14 @@ namespace MessageBus.Concretes
 
             if (channels.TryTake(out channel))
             {
-                logger.LogTrace(
-                    "Channel {ChannelNumber} was took.", channel.ChannelNumber);
+                logger.LogTrace("Channel {ChannelNumber} was took.", channel.ChannelNumber);
 
                 return channel;
             }
 
             channel = connection.CreateModel();
 
-            logger.LogTrace(
-                "Channel {ChannelNumber} was created.", channel.ChannelNumber);
+            logger.LogTrace("Channel {ChannelNumber} was created.", channel.ChannelNumber);
 
             return channel;
         }
@@ -42,9 +40,8 @@ namespace MessageBus.Concretes
         public void Release(IModel channel)
         {
             channels.Add(channel);
-            
-            logger.LogTrace(
-                "Channel {ChannelNumber} was released.", channel.ChannelNumber);
+
+            logger.LogTrace("Channel {ChannelNumber} was released.", channel.ChannelNumber);
         }
     }
 }
