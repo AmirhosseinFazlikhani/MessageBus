@@ -16,8 +16,7 @@ namespace MessageBus.Extensions
             var builderInstance = new MessageBusBuilder();
             builder(builderInstance);
 
-            var connection = CreateConnection(builderInstance.Settings);
-            services.AddSingleton(connection);
+            services.AddSingleton((provider) => CreateConnection(builderInstance.Settings));
 
             services.AddSingleton(new PublisherMiddlewareStorage { Middlewares = builderInstance.PublisherBuilder.Middlewares });
             services.AddSingleton(new SubscriberMiddlewareStorage { Middlewares = builderInstance.SubscriberBuilder.Middlewares });
@@ -32,7 +31,7 @@ namespace MessageBus.Extensions
 
             services.AddHostedService(p =>
             {
-                return new SubscribersActivator(builderInstance.SubscriberBuilder.Subscribers.Select(x=>x.Key).GetEnumerator(), p);
+                return new SubscribersActivator(builderInstance.SubscriberBuilder.Subscribers.Select(x => x.Key).GetEnumerator(), p);
             });
 
             services.AddSingleton<IChannelPool, ChannelPool>();
